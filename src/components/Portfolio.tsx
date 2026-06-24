@@ -11,7 +11,7 @@ export function Portfolio() {
       <SectionHeading
         id="work-heading"
         eyebrow="Selected work"
-        title="My Portfolio."
+        title="Our Portfolio."
         intro={
           hasProjects
             ? 'A sample of recent builds. More case studies coming as engagements wrap.'
