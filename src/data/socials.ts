@@ -22,5 +22,4 @@ export const socials: Social[] = [
   { label: 'TikTok', icon: 'tiktok', href: 'https://www.tiktok.com/@tristanwaddellx', handle: '@tristanwaddellx' },
   { label: 'GitHub', icon: 'github', href: 'https://github.com/Tristan-Waddell', handle: '@Tristan-Waddell' },
   { label: 'X', icon: 'x', href: 'https://x.com/tristanwaddellx', handle: '@tristanwaddellx' },
-  { label: 'Email', icon: 'email', href: 'mailto:tristancwaddell@gmail.com', handle: 'tristancwaddell@gmail.com' },
 ]
