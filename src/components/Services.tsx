@@ -10,7 +10,7 @@ export function Services() {
         id="services-heading"
         eyebrow="Services"
         title="Two Buckets."
-        intro="Focused work in the areas where I can move the needle for you."
+        intro="Focused work in the areas where we can move the needle for you."
       />
 
       <div className="mt-12 grid gap-5 md:grid-cols-2">

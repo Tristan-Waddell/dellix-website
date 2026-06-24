@@ -112,7 +112,7 @@ function EmptyState() {
       </span>
       <h3 className="mt-5 text-xl font-semibold tracking-tight">Case studies in progress.</h3>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
-        Recent work is being written up. In the meantime, the fastest way to see what I build is to start a
+        Recent work is being written up. In the meantime, the fastest way to see what we build is to start a
         conversation.
       </p>
       <a

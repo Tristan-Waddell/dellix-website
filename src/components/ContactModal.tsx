@@ -76,7 +76,7 @@ export function ContactModal({ open, onClose }: Props) {
         <div className="flex items-center justify-between border-b border-steel-700 px-6 py-5">
           <div>
             <h2 id="modal-title" className="text-lg font-semibold tracking-tight">Get in touch</h2>
-            <p className="mt-0.5 text-sm text-ink-muted">I'll get back to you within two business days.</p>
+            <p className="mt-0.5 text-sm text-ink-muted">We'll get back to you within two business days.</p>
           </div>
           <button
             type="button"

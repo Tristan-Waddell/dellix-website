@@ -21,7 +21,7 @@ export const services: Service[] = [
     name: 'Custom Agents',
     summary: 'Personal assistants and automations that live where you work.',
     description:
-      'I build Hermes-style personal assistant agents and workflow automations that plug into the tools and channels your team already uses — Slack, Discord, email, and beyond. Real automations, not demos.',
+      'We build Hermes-style personal assistant agents and workflow automations that plug into the tools and channels your team already uses — Slack, Discord, email, and beyond. Real automations, not demos.',
     capabilities: [
       'Personal assistant agents (Hermes-style)',
       'Workflow automations across Slack, Discord & more',
