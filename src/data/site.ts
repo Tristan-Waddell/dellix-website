@@ -12,7 +12,7 @@ export const site = {
     'Dellix builds custom AI agents and ships production software for teams that need real outcomes, not demos.',
   email: 'tristancwaddell@gmail.com',
   /** Optional booking link (e.g. Cal.com / Calendly). Leave empty to hide the button. */
-  bookingUrl: '',
+  bookingUrl: 'tristanwaddell/30min',
 } as const
 
 /** Anchor links rendered in the sticky nav, in order. */
@@ -48,5 +48,5 @@ export const about = {
 
 export const contact = {
   heading: "Let's build something.",
-  body: 'Tell me what you are trying to build or fix. If it is a fit, you will hear back within two business days.',
+  body: 'Book a 30-minute intro call to talk through what you are building. Prefer async? Send a message instead.',
 } as const

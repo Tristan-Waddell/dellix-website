@@ -18,6 +18,7 @@ export type IconName =
   | 'check'
   | 'menu'
   | 'close'
+  | 'calendar'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -95,6 +96,16 @@ const paths: Record<IconName, React.ReactNode> = {
       strokeWidth="1.8"
       strokeLinecap="round"
       d="M6 6l12 12M18 6 6 18"
+    />
+  ),
+  calendar: (
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 2v3M16 2v3M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
     />
   ),
 }

@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { contact } from '../data/site'
+import { useEffect, useState } from 'react'
+import { getCalApi } from '@calcom/embed-react'
+import { contact, site } from '../data/site'
 import { Section } from './ui/Section'
 import { Socials } from './Socials'
 import { Icon } from './Icon'
@@ -9,6 +10,13 @@ import { ContactModal } from './ContactModal'
 export function Contact() {
   const ref = useReveal<HTMLDivElement>()
   const [modalOpen, setModalOpen] = useState(false)
+
+  useEffect(() => {
+    (async () => {
+      const cal = await getCalApi({})
+      cal('ui', { theme: 'dark', hideEventTypeDetails: false })
+    })()
+  }, [])
 
   return (
     <Section id="contact" aria-labelledby="contact-heading">
@@ -28,15 +36,25 @@ export function Contact() {
           </h2>
           <p className="mt-4 text-pretty text-base leading-relaxed text-ink-muted sm:text-lg">{contact.body}</p>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              data-cal-link={site.bookingUrl}
+              data-cal-config='{"layout":"month_view"}'
+              className="group inline-flex items-center gap-2 rounded-full bg-lime-500 px-5 py-2.5 text-sm font-semibold text-charcoal-950 transition-all hover:bg-lime-400 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--color-lime-400),0_8px_30px_-8px_color-mix(in_oklab,var(--color-lime-500)_55%,transparent)]"
+            >
+              <Icon name="calendar" className="text-[1.1em]" />
+              Book a Call
+              <Icon name="arrow" className="text-[1.05em] transition-transform group-hover:translate-x-0.5" />
+            </button>
+
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="group inline-flex items-center gap-2 rounded-full bg-lime-500 px-5 py-2.5 text-sm font-semibold text-charcoal-950 transition-all hover:bg-lime-400 hover:-translate-y-0.5 hover:shadow-[0_0_0_1px_var(--color-lime-400),0_8px_30px_-8px_color-mix(in_oklab,var(--color-lime-500)_55%,transparent)]"
+              className="inline-flex items-center gap-2 rounded-full border border-steel-600 bg-steel-800/60 px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-steel-700"
             >
               <Icon name="email" className="text-[1.1em]" />
-              Contact Me
-              <Icon name="arrow" className="text-[1.05em] transition-transform group-hover:translate-x-0.5" />
+              Send a message
             </button>
           </div>
         </div>
