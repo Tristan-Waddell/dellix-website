@@ -1,4 +1,4 @@
-# Dellix — marketing site
+# Dellix — marketing site 
 
 Marketing site for **Dellix** (dellix.dev) — _Custom agents. Real code. Production outcomes._
 
