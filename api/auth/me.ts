@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { withRoute, methodNotAllowed, HttpError } from '../_lib/http'
-import { hasValidSession } from '../_lib/auth'
+import { withRoute, methodNotAllowed, HttpError } from '../_lib/http.js'
+import { hasValidSession } from '../_lib/auth.js'
 
 export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
   if (req.method !== 'GET') return methodNotAllowed(res, ['GET'])

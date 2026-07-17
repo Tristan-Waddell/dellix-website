@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { withRoute, methodNotAllowed, requireString, optionalString } from '../../_lib/http'
-import { requireAuth } from '../../_lib/auth'
-import { sql } from '../../_lib/db'
+import { withRoute, methodNotAllowed, requireString, optionalString } from '../../_lib/http.js'
+import { requireAuth } from '../../_lib/auth.js'
+import { sql } from '../../_lib/db.js'
 
 export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
   await requireAuth(req, res)
