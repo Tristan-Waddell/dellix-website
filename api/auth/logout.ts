@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { withRoute, methodNotAllowed } from '../_lib/http.ts'
-import { clearSessionCookie } from '../_lib/auth.ts'
+import { withRoute, methodNotAllowed } from '../_lib/http'
+import { clearSessionCookie } from '../_lib/auth'
 
 export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST'])

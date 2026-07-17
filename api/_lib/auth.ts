@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { SignJWT, jwtVerify } from 'jose'
 import { serialize } from 'cookie'
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { HttpError } from './http.ts'
+import { HttpError } from './http'
 
 const SESSION_COOKIE = 'dellix_session'
 const SESSION_TTL = '7d'

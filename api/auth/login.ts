@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import bcrypt from 'bcryptjs'
-import { withRoute, methodNotAllowed, requireString, HttpError } from '../_lib/http.ts'
-import { createSessionCookie } from '../_lib/auth.ts'
+import { withRoute, methodNotAllowed, requireString, HttpError } from '../_lib/http'
+import { createSessionCookie } from '../_lib/auth'
 
 export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
   if (req.method !== 'POST') return methodNotAllowed(res, ['POST'])

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { withRoute, methodNotAllowed, requireString, optionalString, HttpError } from '../../_lib/http.ts'
-import { requireAuth } from '../../_lib/auth.ts'
-import { sql } from '../../_lib/db.ts'
-import { DEAL_STAGES, type DealStage } from '../../../shared/types.ts'
+import { withRoute, methodNotAllowed, requireString, optionalString, HttpError } from '../../_lib/http'
+import { requireAuth } from '../../_lib/auth'
+import { sql } from '../../_lib/db'
+import { DEAL_STAGES, type DealStage } from '../../../shared/types'
 
 function parseStage(value: unknown): DealStage {
   if (typeof value === 'string' && (DEAL_STAGES as string[]).includes(value)) return value as DealStage
