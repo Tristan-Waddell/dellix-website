@@ -1,4 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
 import { Icon } from '../../components/Icon.tsx'
 import { Modal, Field, inputClass } from '../components/Modal.tsx'
 import { deals, contacts, companies, ApiError } from '../api.ts'
@@ -12,34 +22,59 @@ const stageLabels: Record<DealStage, string> = {
   lost: 'Lost',
 }
 
+const stageAccent: Record<DealStage, string> = {
+  lead: 'border-t-steel-500',
+  contacted: 'border-t-steel-400',
+  proposal: 'border-t-lime-500/60',
+  won: 'border-t-lime-500',
+  lost: 'border-t-red-500/60',
+}
+
 function formatValue(cents: number) {
   return (cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 }
 
 export function DealsPage() {
   const [list, setList] = useState<Deal[] | null>(null)
-  const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all')
   const [contactList, setContactList] = useState<Contact[]>([])
   const [companyList, setCompanyList] = useState<Company[]>([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null)
 
   function reload() {
-    deals.list(stageFilter === 'all' ? undefined : stageFilter).then((res) => setList(res.deals))
+    deals.list().then((res) => setList(res.deals))
   }
 
   useEffect(() => {
     reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stageFilter])
-
-  useEffect(() => {
     contacts.list().then((res) => setContactList(res.contacts))
     companies.list().then((res) => setCompanyList(res.companies))
   }, [])
 
-  async function moveStage(deal: Deal, stage: DealStage) {
-    const updated = await deals.update(deal.id, { stage })
-    setList((prev) => prev?.map((d) => (d.id === deal.id ? updated.deal : d)) ?? null)
+  const columns = useMemo(() => {
+    const byStage: Record<DealStage, Deal[]> = { lead: [], contacted: [], proposal: [], won: [], lost: [] }
+    for (const deal of list ?? []) byStage[deal.stage].push(deal)
+    return byStage
+  }, [list])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
+  )
+
+  async function handleDragEnd(event: DragEndEvent) {
+    setActiveDeal(null)
+    const dealId = event.active.id as string
+    const newStage = event.over?.id as DealStage | undefined
+    const deal = list?.find((d) => d.id === dealId)
+    if (!deal || !newStage || newStage === deal.stage) return
+
+    setList((prev) => prev?.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d)) ?? null)
+    try {
+      await deals.update(dealId, { stage: newStage })
+    } catch {
+      setList((prev) => prev?.map((d) => (d.id === dealId ? { ...d, stage: deal.stage } : d)) ?? null)
+    }
   }
 
   async function handleDelete(deal: Deal) {
@@ -62,53 +97,28 @@ export function DealsPage() {
         </button>
       </div>
 
-      <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
-        {(['all', ...DEAL_STAGES] as const).map((stage) => (
-          <button
-            key={stage}
-            type="button"
-            onClick={() => setStageFilter(stage)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-              stageFilter === stage
-                ? 'border-lime-500/60 bg-lime-500/10 text-lime-500'
-                : 'border-steel-700 text-ink-muted hover:text-ink'
-            }`}
-          >
-            {stage === 'all' ? 'All' : stageLabels[stage]}
-          </button>
-        ))}
-      </div>
-
-      <ul className="flex flex-col gap-2">
-        {list?.length === 0 && <p className="py-8 text-center text-sm text-ink-muted">No deals yet.</p>}
-        {list?.map((deal) => (
-          <li key={deal.id} className="flex flex-col gap-3 rounded-lg border border-steel-700 bg-steel-900 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="truncate font-medium text-ink">{deal.name}</p>
-              <p className="text-sm text-ink-muted">{formatValue(deal.value_cents)}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={deal.stage}
-                onChange={(e) => moveStage(deal, e.target.value as DealStage)}
-                className={`${inputClass} py-1.5 text-sm`}
-              >
-                {DEAL_STAGES.map((stage) => (
-                  <option key={stage} value={stage}>{stageLabels[stage]}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => handleDelete(deal)}
-                aria-label="Delete deal"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
-              >
-                <Icon name="trash" className="text-base" />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      {list === null ? (
+        <p className="text-sm text-ink-muted">Loading…</p>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          onDragStart={(e) => setActiveDeal(list.find((d) => d.id === e.active.id) ?? null)}
+          onDragCancel={() => setActiveDeal(null)}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+            {DEAL_STAGES.map((stage) => (
+              <StageColumn
+                key={stage}
+                stage={stage}
+                dealsInStage={columns[stage]}
+                isDragging={activeDeal !== null}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </DndContext>
+      )}
 
       <AddDealModal
         open={modalOpen}
@@ -117,6 +127,78 @@ export function DealsPage() {
         companyList={companyList}
         onCreated={reload}
       />
+    </div>
+  )
+}
+
+function StageColumn({
+  stage,
+  dealsInStage,
+  isDragging,
+  onDelete,
+}: {
+  stage: DealStage
+  dealsInStage: Deal[]
+  isDragging: boolean
+  onDelete: (deal: Deal) => void
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage })
+  const total = dealsInStage.reduce((sum, d) => sum + d.value_cents, 0)
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex w-[78vw] shrink-0 flex-col gap-3 rounded-[var(--radius-card)] border border-t-2 bg-steel-900/60 p-3 transition-colors sm:w-72 ${stageAccent[stage]} ${
+        isOver ? 'border-lime-500/60 bg-steel-900' : 'border-steel-700'
+      }`}
+    >
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm font-semibold text-ink">{stageLabels[stage]}</p>
+        <p className="text-xs text-ink-muted">{dealsInStage.length} · {formatValue(total)}</p>
+      </div>
+
+      <div className={`flex min-h-24 flex-col gap-2 ${isDragging ? 'pb-6' : ''}`}>
+        {dealsInStage.map((deal) => (
+          <DealCard key={deal.id} deal={deal} onDelete={onDelete} />
+        ))}
+        {dealsInStage.length === 0 && (
+          <p className="rounded-lg border border-dashed border-steel-700 px-3 py-6 text-center text-xs text-ink-muted">
+            Drop here
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DealCard({ deal, onDelete }: { deal: Deal; onDelete: (deal: Deal) => void }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: deal.id })
+
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, touchAction: 'none' as const }
+    : { touchAction: 'none' as const }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={`group relative cursor-grab rounded-lg border border-steel-700 bg-steel-900 px-3.5 py-3 active:cursor-grabbing ${
+        isDragging ? 'z-10 opacity-50' : ''
+      }`}
+    >
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={() => onDelete(deal)}
+        aria-label="Delete deal"
+        className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-md text-ink-muted opacity-0 transition-opacity hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+      >
+        <Icon name="trash" className="text-sm" />
+      </button>
+      <p className="truncate pr-6 font-medium text-ink">{deal.name}</p>
+      <p className="mt-1 text-sm text-ink-muted">{formatValue(deal.value_cents)}</p>
     </div>
   )
 }
