@@ -106,7 +106,7 @@ export function DealsPage() {
           onDragCancel={() => setActiveDeal(null)}
           onDragEnd={handleDragEnd}
         >
-          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {DEAL_STAGES.map((stage) => (
               <StageColumn
                 key={stage}
@@ -148,9 +148,9 @@ function StageColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[78vw] shrink-0 flex-col gap-3 rounded-[var(--radius-card)] border border-t-2 bg-steel-900/60 p-3 transition-colors sm:w-72 ${stageAccent[stage]} ${
-        isOver ? 'border-lime-500/60 bg-steel-900' : 'border-steel-700'
-      }`}
+      className={`flex flex-col gap-3 rounded-[var(--radius-card)] border border-t-2 bg-steel-900/60 p-3 transition-colors ${stageAccent[stage]} ${
+        stage === 'lost' ? 'col-span-2 sm:col-span-3 lg:col-span-1' : ''
+      } ${isOver ? 'border-lime-500/60 bg-steel-900' : 'border-steel-700'}`}
     >
       <div className="flex items-center justify-between px-1">
         <p className="text-sm font-semibold text-ink">{stageLabels[stage]}</p>
