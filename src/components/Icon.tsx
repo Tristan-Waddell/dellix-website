@@ -19,6 +19,13 @@ export type IconName =
   | 'menu'
   | 'close'
   | 'calendar'
+  | 'users'
+  | 'building'
+  | 'pipeline'
+  | 'logout'
+  | 'plus'
+  | 'trash'
+  | 'search'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -107,6 +114,41 @@ const paths: Record<IconName, React.ReactNode> = {
       strokeLinejoin="round"
       d="M8 2v3M16 2v3M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
     />
+  ),
+  users: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6M16 8.3a3 3 0 1 1 0 5.9M21 20c0-2.7-1.8-4.98-4.27-5.71" />
+    </g>
+  ),
+  building: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 21V4.5A1.5 1.5 0 0 1 5.5 3h7A1.5 1.5 0 0 1 14 4.5V21M18 21v-9.5a1.5 1.5 0 0 0-1.5-1.5H14M4 21h16M7.5 7h3M7.5 11h3M7.5 15h3" />
+    </g>
+  ),
+  pipeline: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6h16M4 12h10M4 18h6" />
+    </g>
+  ),
+  logout: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+    </g>
+  ),
+  plus: (
+    <path fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M12 4v16M4 12h16" />
+  ),
+  trash: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 7h16M8 7V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V7M18 7l-.8 12.1a2 2 0 0 1-2 1.9H8.8a2 2 0 0 1-2-1.9L6 7" />
+    </g>
+  ),
+  search: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m20 20-3.8-3.8" />
+    </g>
   ),
 }
 
