@@ -1,0 +1,1 @@
+{"root":["./api/contact.ts","./api/_lib/auth.ts","./api/_lib/db.ts","./api/_lib/http.ts","./api/auth/login.ts","./api/auth/logout.ts","./api/auth/me.ts","./api/v1/companies/[id].ts","./api/v1/companies/index.ts","./api/v1/contacts/[id].ts","./api/v1/contacts/index.ts","./api/v1/deals/[id].ts","./api/v1/deals/index.ts","./shared/types.ts"],"version":"5.9.3"}

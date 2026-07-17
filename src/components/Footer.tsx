@@ -35,7 +35,12 @@ export function Footer() {
           <p>
             © {year} {site.name}. All rights reserved.
           </p>
-          <p className="font-mono">{site.domain}</p>
+          <p className="flex items-center gap-3">
+            <span className="font-mono">{site.domain}</span>
+            <a href="/admin" className="transition-colors hover:text-ink">
+              Admin
+            </a>
+          </p>
         </div>
       </div>
     </footer>

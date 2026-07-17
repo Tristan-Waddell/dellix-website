@@ -48,8 +48,59 @@ src/
   components/       UI sections + primitives (ui/Button, ui/Section)
   hooks/useReveal   subtle scroll-in animation (respects reduced-motion)
   App.tsx           page composition
+  admin/            CRM admin portal (separate app, served at /admin)
+api/
+  contact.ts        contact form → Resend
+  auth/             admin login/logout/session check
+  v1/               CRM REST API (contacts, companies, deals)
+  _lib/             shared API helpers (db, auth, http)
+shared/types.ts      types shared by the API, admin UI, and CLI
+cli/dellix-crm.js    CLI for the CRM API
+db/schema.sql        Postgres schema
+scripts/             one-off setup scripts (migrate, hash password, generate API key)
+```
+
+## CRM
+
+A small HubSpot-style CRM (contacts, companies, deals) lives behind `/admin`, linked from the Footer. It's the same REST API for the admin portal, the CLI, and any personal agent — just two ways to authenticate.
+
+### One-time setup
+
+1. Add Vercel Postgres (Neon) from the Vercel dashboard's Storage tab, or point `DATABASE_URL` at any Postgres instance.
+2. Copy `.env.example` to `.env` and fill in:
+   - `DATABASE_URL` — from the Storage tab (or your own Postgres).
+   - `SESSION_SECRET` — `openssl rand -hex 32`.
+   - `ADMIN_PASSWORD_HASH` — `npm run hash-password -- 'your-password'`.
+   - `API_KEY_HASH` — `npm run generate-api-key` (save the printed raw key — it's shown once).
+3. Apply the schema: `npm run db:migrate`.
+4. Add the same env vars to the Vercel project settings for production.
+
+### Admin portal
+
+Visit `/admin`, sign in with the password from step 2. Mobile-first: bottom tab bar on phones, a left rail on desktop. Manage Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).
+
+### CLI / agent access
+
+`cli/dellix-crm.js` talks to the same API with an API key (no session cookie needed):
+
+```bash
+export DELLIX_API_URL=https://dellix.dev   # or http://localhost:5173 in dev
+export DELLIX_API_KEY=dlx_xxxxxxxxxxxxxxxx  # from `npm run generate-api-key`
+
+node cli/dellix-crm.js contacts list
+node cli/dellix-crm.js contacts add --name "Ada Lovelace" --email ada@example.com
+node cli/dellix-crm.js deals add --name "Acme retainer" --value 5000 --stage proposal
+node cli/dellix-crm.js deals move <id> won
+```
+
+A personal agent (e.g. Claude) can use the same CLI via shell, or call the REST API directly:
+
+```bash
+curl -H "Authorization: Bearer $DELLIX_API_KEY" "$DELLIX_API_URL/api/v1/contacts"
 ```
 
 ## Deploy
 
 Static output — `npm run build` produces `/dist`. Deploy to any static host (Vercel, Netlify, Cloudflare Pages, GitHub Pages). No server required.
+
+The CRM API and admin portal require a Vercel deployment (for the serverless functions) with `DATABASE_URL`, `SESSION_SECRET`, `ADMIN_PASSWORD_HASH`, and `API_KEY_HASH` set as project environment variables — see [CRM](#crm) above.
