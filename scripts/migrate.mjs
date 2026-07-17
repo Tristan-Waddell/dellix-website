@@ -13,8 +13,16 @@ const schemaPath = fileURLToPath(new URL('../db/schema.sql', import.meta.url))
 const schema = readFileSync(schemaPath, 'utf8')
 const sql = neon(process.env.DATABASE_URL)
 
+// Neon's HTTP driver runs one statement per request, so split on statement-terminating semicolons.
+const statements = schema
+  .split(/;\s*(?:\n|$)/)
+  .map((s) => s.trim())
+  .filter(Boolean)
+
 try {
-  await sql.query(schema)
+  for (const statement of statements) {
+    await sql.query(statement)
+  }
   console.log('Migration applied.')
 } catch (err) {
   console.error('Migration failed:', err)
