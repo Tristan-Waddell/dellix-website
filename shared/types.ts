@@ -40,4 +40,44 @@ export type Deal = {
   updated_at: string
 }
 
+export type TaskPriority = 'low' | 'normal' | 'high'
+
+export const TASK_PRIORITIES: TaskPriority[] = ['low', 'normal', 'high']
+
+export type Task = {
+  id: string
+  title: string
+  completed: boolean
+  priority: TaskPriority
+  due_date: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type DashboardActivityKind = 'contact' | 'company' | 'deal' | 'task'
+
+export type DashboardActivity = {
+  id: string
+  kind: DashboardActivityKind
+  label: string
+  detail: string | null
+  occurred_at: string
+}
+
+export type DashboardData = {
+  summary: {
+    contacts: number
+    companies: number
+    active_deals: number
+    open_pipeline_cents: number
+  }
+  pipeline: Array<{
+    stage: DealStage
+    count: number
+    value_cents: number
+  }>
+  tasks: Task[]
+  recent_activity: DashboardActivity[]
+}
+
 export type ApiError = { error: string }

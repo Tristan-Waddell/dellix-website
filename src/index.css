@@ -53,6 +53,7 @@
 
   html {
     scroll-behavior: smooth;
+    color-scheme: dark;
     /* offset for the sticky nav when jumping to anchors */
     scroll-padding-top: 6rem;
     -webkit-font-smoothing: antialiased;
