@@ -75,6 +75,14 @@ A small HubSpot-style CRM (contacts, companies, deals) lives behind `/admin`, li
 3. Apply the schema: `npm run db:migrate`.
 4. Add the same env vars to the Vercel project settings for production.
 
+Create additional agent keys without replacing or disabling the original environment key:
+
+```bash
+npm run create-agent-api-key -- --name "Research agent" --days 365
+```
+
+Named keys are stored as hashes in Postgres, can coexist, and expire only on their explicit expiration date. The minimum lifetime accepted by the key generator is 90 days.
+
 ### Admin portal
 
 Visit `/admin`, sign in with the password from step 2. The Overview dashboard includes live CRM totals, pipeline health, recent activity, and a persisted to-do list with priorities and due dates. Manage Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).

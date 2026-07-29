@@ -13,6 +13,7 @@
     "lint": "tsc --noEmit",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "generate-api-key": "node scripts/generate-api-key.mjs",
+    "create-agent-api-key": "node --env-file=.env scripts/create-agent-api-key.mjs",
     "hash-password": "node scripts/hash-password.mjs"
   },
   "dependencies": {
