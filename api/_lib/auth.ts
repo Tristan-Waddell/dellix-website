@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { serialize } from 'cookie'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { HttpError } from './http.js'
+import { sql } from './db.js'
 
 const SESSION_COOKIE = 'dellix_session'
 const SESSION_TTL = '7d'
@@ -52,23 +53,47 @@ export async function hasValidSession(req: VercelRequest): Promise<boolean> {
   }
 }
 
-function validApiKey(req: VercelRequest): boolean {
+function matchesHash(providedHash: Buffer, expectedHash: string): boolean {
+  if (!/^[a-f0-9]{64}$/i.test(expectedHash)) return false
+  const expected = Buffer.from(expectedHash, 'hex')
+  return providedHash.length === expected.length && timingSafeEqual(providedHash, expected)
+}
+
+async function validApiKey(req: VercelRequest): Promise<boolean> {
   const header = req.headers.authorization
   if (!header?.startsWith('Bearer ')) return false
-  const expectedHash = process.env.API_KEY_HASH
-  if (!expectedHash) return false
 
   const providedKey = header.slice('Bearer '.length).trim()
   const providedHash = createHash('sha256').update(providedKey).digest()
-  const expected = Buffer.from(expectedHash, 'hex')
+  const providedHashHex = providedHash.toString('hex')
 
-  if (providedHash.length !== expected.length) return false
-  return timingSafeEqual(providedHash, expected)
+  // Preserve the original environment key and optionally accept a comma/space-separated
+  // set during migration. Environment keys intentionally have no automatic expiry.
+  const environmentHashes = [
+    process.env.API_KEY_HASH,
+    ...(process.env.API_KEY_HASHES?.split(/[,\s]+/) ?? []),
+  ].filter((hash): hash is string => Boolean(hash))
+
+  if (environmentHashes.some((hash) => matchesHash(providedHash, hash))) return true
+
+  // Named agent keys are independently revocable and remain active until their
+  // explicit expiration date, so issuing one never disables another.
+  const rows = await sql`
+    select id from api_keys
+    where key_hash = ${providedHashHex}
+      and revoked_at is null
+      and (expires_at is null or expires_at > now())
+    limit 1
+  `
+  if (!rows[0]) return false
+
+  await sql`update api_keys set last_used_at = now() where id = ${rows[0].id}`
+  return true
 }
 
 /** Guards CRM API routes: accepts either an admin session cookie or a Bearer API key. */
 export async function requireAuth(req: VercelRequest, _res: VercelResponse): Promise<void> {
   if (await hasValidSession(req)) return
-  if (validApiKey(req)) return
+  if (await validApiKey(req)) return
   throw new HttpError(401, 'Unauthorized.')
 }

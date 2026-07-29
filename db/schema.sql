@@ -44,8 +44,20 @@ create table if not exists tasks (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists api_keys (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  key_prefix text not null,
+  key_hash text not null unique,
+  expires_at timestamptz,
+  revoked_at timestamptz,
+  last_used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists contacts_company_id_idx on contacts (company_id);
 create index if not exists deals_contact_id_idx on deals (contact_id);
 create index if not exists deals_company_id_idx on deals (company_id);
 create index if not exists deals_stage_idx on deals (stage);
 create index if not exists tasks_completed_due_date_idx on tasks (completed, due_date);
+create index if not exists api_keys_active_idx on api_keys (expires_at) where revoked_at is null;
