@@ -26,6 +26,9 @@ export type IconName =
   | 'plus'
   | 'trash'
   | 'search'
+  | 'dashboard'
+  | 'clock'
+  | 'dollar'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -148,6 +151,25 @@ const paths: Record<IconName, React.ReactNode> = {
     <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="6.5" />
       <path d="m20 20-3.8-3.8" />
+    </g>
+  ),
+  dashboard: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="4" rx="1.5" />
+      <rect x="14" y="11" width="7" height="10" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    </g>
+  ),
+  clock: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </g>
+  ),
+  dollar: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v20M17 6.5c-1-1.1-2.55-1.75-4.35-1.75-2.65 0-4.65 1.4-4.65 3.5 0 5.25 9 2.25 9 7.5 0 2.1-2 3.5-4.65 3.5-2.2 0-4.1-.9-5.35-2.4" />
     </g>
   ),
 }

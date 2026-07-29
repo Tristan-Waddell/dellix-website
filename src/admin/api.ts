@@ -1,4 +1,4 @@
-import type { Company, Contact, Deal, DealStage } from '../../shared/types.ts'
+import type { Company, Contact, DashboardData, Deal, DealStage, Task } from '../../shared/types.ts'
 
 class ApiError extends Error {
   status: number
@@ -57,4 +57,16 @@ export const deals = {
   create: (data: Partial<Deal>) => request<{ deal: Deal }>('/v1/deals', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Partial<Deal>) => request<{ deal: Deal }>(`/v1/deals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: string) => request<void>(`/v1/deals/${id}`, { method: 'DELETE' }),
+}
+
+export const dashboard = {
+  get: () => request<{ dashboard: DashboardData }>('/v1/dashboard'),
+}
+
+export const tasks = {
+  list: () => request<{ tasks: Task[] }>('/v1/tasks'),
+  get: (id: string) => request<{ task: Task }>(`/v1/tasks/${id}`),
+  create: (data: Partial<Task>) => request<{ task: Task }>('/v1/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: Partial<Task>) => request<{ task: Task }>(`/v1/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id: string) => request<void>(`/v1/tasks/${id}`, { method: 'DELETE' }),
 }

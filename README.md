@@ -52,7 +52,7 @@ src/
 api/
   contact.ts        contact form → Resend
   auth/             admin login/logout/session check
-  v1/               CRM REST API (contacts, companies, deals)
+  v1/               CRM REST API (dashboard, tasks, contacts, companies, deals)
   _lib/             shared API helpers (db, auth, http)
 shared/types.ts      types shared by the API, admin UI, and CLI
 cli/dellix-crm.js    CLI for the CRM API
@@ -77,7 +77,7 @@ A small HubSpot-style CRM (contacts, companies, deals) lives behind `/admin`, li
 
 ### Admin portal
 
-Visit `/admin`, sign in with the password from step 2. Mobile-first: bottom tab bar on phones, a left rail on desktop. Manage Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).
+Visit `/admin`, sign in with the password from step 2. The Overview dashboard includes live CRM totals, pipeline health, recent activity, and a persisted to-do list with priorities and due dates. Manage Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).
 
 ### CLI / agent access
 
@@ -91,6 +91,9 @@ node cli/dellix-crm.js contacts list
 node cli/dellix-crm.js contacts add --name "Ada Lovelace" --email ada@example.com
 node cli/dellix-crm.js deals add --name "Acme retainer" --value 5000 --stage proposal
 node cli/dellix-crm.js deals move <id> won
+node cli/dellix-crm.js dashboard
+node cli/dellix-crm.js tasks add --title "Send proposal" --priority high --due 2026-08-01
+node cli/dellix-crm.js tasks complete <id>
 ```
 
 A personal agent (e.g. Claude) can use the same CLI via shell, or call the REST API directly:
@@ -98,6 +101,16 @@ A personal agent (e.g. Claude) can use the same CLI via shell, or call the REST 
 ```bash
 curl -H "Authorization: Bearer $DELLIX_API_KEY" "$DELLIX_API_URL/api/v1/contacts"
 ```
+
+Dashboard API routes (all accept the admin session or `Authorization: Bearer …`):
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/dashboard` | Summary totals, pipeline breakdown, tasks, and recent activity |
+| `GET`, `POST` | `/api/v1/tasks` | List or create tasks |
+| `GET`, `PATCH`, `DELETE` | `/api/v1/tasks/:id` | Read, edit, complete, or remove a task |
+
+Task writes accept `title`, `priority` (`low`, `normal`, or `high`), `due_date` (`YYYY-MM-DD` or `null`), and `completed` (on `PATCH`). Dashboard totals and activity are calculated directly from the CRM records, so API changes to contacts, companies, deals, or tasks are reflected automatically.
 
 ## Deploy
 

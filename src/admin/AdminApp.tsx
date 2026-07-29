@@ -8,6 +8,7 @@ import { ContactDetailPage } from './pages/ContactDetailPage.tsx'
 import { CompaniesPage } from './pages/CompaniesPage.tsx'
 import { CompanyDetailPage } from './pages/CompanyDetailPage.tsx'
 import { DealsPage } from './pages/DealsPage.tsx'
+import { DashboardPage } from './pages/DashboardPage.tsx'
 
 type AuthState = 'checking' | 'authed' | 'anon'
 
@@ -61,7 +62,7 @@ export function AdminApp() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<RequireAuth />}>
             <Route element={<AdminLayout />}>
-              <Route index element={<Navigate to="/contacts" replace />} />
+              <Route index element={<DashboardPage />} />
               <Route path="contacts" element={<ContactsPage />} />
               <Route path="contacts/:id" element={<ContactDetailPage />} />
               <Route path="companies" element={<CompaniesPage />} />

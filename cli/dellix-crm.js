@@ -122,4 +122,54 @@ dealCmd
     console.log(JSON.stringify(data.deal, null, 2))
   })
 
+program
+  .command('dashboard')
+  .description('Show the dashboard summary, pipeline, tasks, and recent activity')
+  .action(async () => {
+    const data = await request('/dashboard')
+    console.log(JSON.stringify(data.dashboard, null, 2))
+  })
+
+const taskCmd = program.command('tasks').description('Manage dashboard tasks')
+
+taskCmd
+  .command('list')
+  .description('List tasks')
+  .action(async () => {
+    const data = await request('/tasks')
+    printTable(data.tasks)
+  })
+
+taskCmd
+  .command('add')
+  .description('Add a task')
+  .requiredOption('--title <title>', 'task title')
+  .option('--priority <priority>', 'low|normal|high', 'normal')
+  .option('--due <date>', 'due date in YYYY-MM-DD format')
+  .action(async (opts) => {
+    const data = await request('/tasks', {
+      method: 'POST',
+      body: { title: opts.title, priority: opts.priority, due_date: opts.due },
+    })
+    console.log(JSON.stringify(data.task, null, 2))
+  })
+
+for (const [command, completed] of [['complete', true], ['reopen', false]]) {
+  taskCmd
+    .command(`${command} <id>`)
+    .description(`${command === 'complete' ? 'Complete' : 'Reopen'} a task`)
+    .action(async (id) => {
+      const data = await request(`/tasks/${id}`, { method: 'PATCH', body: { completed } })
+      console.log(JSON.stringify(data.task, null, 2))
+    })
+}
+
+taskCmd
+  .command('delete <id>')
+  .description('Delete a task')
+  .action(async (id) => {
+    await request(`/tasks/${id}`, { method: 'DELETE' })
+    console.log('Deleted.')
+  })
+
 program.parseAsync()
