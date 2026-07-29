@@ -3,7 +3,7 @@
 // any personal agent use, authenticated with a Bearer API key.
 //
 // Config (env vars):
-//   DELLIX_API_URL  Base URL of the deployed site, e.g. https://dellix.dev (default: http://localhost:5173)
+//   DELLIX_API_URL  Base URL of the deployed site, e.g. https://www.dellix.dev (default: http://localhost:5173)
 //   DELLIX_API_KEY  API key generated via `npm run generate-api-key`
 
 import { Command } from 'commander'

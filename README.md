@@ -92,7 +92,7 @@ Visit `/admin`, sign in with the password from step 2. The Overview dashboard in
 `cli/dellix-crm.js` talks to the same API with an API key (no session cookie needed):
 
 ```bash
-export DELLIX_API_URL=https://dellix.dev   # or http://localhost:5173 in dev
+export DELLIX_API_URL=https://www.dellix.dev   # or http://localhost:5173 in dev
 export DELLIX_API_KEY=dlx_xxxxxxxxxxxxxxxx  # from `npm run generate-api-key`
 
 node cli/dellix-crm.js contacts list
@@ -109,6 +109,10 @@ A personal agent (e.g. Claude) can use the same CLI via shell, or call the REST 
 ```bash
 curl -H "Authorization: Bearer $DELLIX_API_KEY" "$DELLIX_API_URL/api/v1/contacts"
 ```
+
+Use the canonical `https://www.dellix.dev` hostname for authenticated API requests. The apex
+`https://dellix.dev` hostname redirects to `www`, and many HTTP clients intentionally remove
+the `Authorization` header on a cross-host redirect.
 
 Dashboard API routes (all accept the admin session or `Authorization: Bearer …`):
 
