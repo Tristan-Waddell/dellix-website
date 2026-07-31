@@ -318,6 +318,7 @@ function TaskPanel({
   }
 
   async function handleDelete(task: Task) {
+    if (!window.confirm(`Delete “${task.title}”?`)) return
     onRemoved(task.id)
     try {
       await tasks.remove(task.id)
@@ -354,44 +355,44 @@ function TaskPanel({
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="What needs doing?"
-            className="min-w-0 flex-1 rounded-lg border border-steel-700 bg-charcoal-900 px-3.5 py-2.5 text-sm text-ink placeholder:text-steel-500 focus:border-lime-500/60 focus:outline-none"
+            className="h-11 min-w-0 flex-1 rounded-lg border border-steel-700 bg-charcoal-900 px-3.5 text-base text-ink placeholder:text-steel-500 focus:border-lime-500/60 focus:outline-none sm:text-sm"
           />
           <button
             type="submit"
             disabled={submitting || !title.trim()}
             aria-label="Add task"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-lime-500 text-charcoal-950 transition-colors hover:bg-lime-400 disabled:cursor-not-allowed disabled:opacity-40"
+            className="grid h-11 w-11 shrink-0 touch-manipulation place-items-center rounded-lg bg-lime-500 text-charcoal-950 transition-colors hover:bg-lime-400 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Icon name="plus" className="text-lg" />
           </button>
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <label className="relative">
-            <span className="sr-only">Priority</span>
+        <div className="mt-3 grid grid-cols-1 gap-2 xs:grid-cols-2">
+          <label>
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Priority</span>
             <select
               value={priority}
               onChange={(event) => setPriority(event.target.value as TaskPriority)}
-              className="h-9 w-full appearance-none rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink-muted focus:border-lime-500/60 focus:outline-none"
+              className="h-11 w-full appearance-none rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-sm text-ink focus:border-lime-500/60 focus:outline-none sm:h-9 sm:text-xs"
             >
               {TASK_PRIORITIES.map((value) => (
                 <option key={value} value={value}>{priorityLabels[value]} priority</option>
               ))}
             </select>
           </label>
-          <label className="relative">
-            <span className="sr-only">Due date</span>
+          <label>
+            <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Due date</span>
             <input
               type="date"
               value={dueDate}
               onChange={(event) => setDueDate(event.target.value)}
-              className="h-9 w-full rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink-muted focus:border-lime-500/60 focus:outline-none"
+              className="h-11 w-full rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-sm text-ink focus:border-lime-500/60 focus:outline-none sm:h-9 sm:text-xs"
             />
           </label>
         </div>
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
       </form>
 
-      <div className="max-h-[32rem] overflow-y-auto">
+      <div className="sm:max-h-[32rem] sm:overflow-y-auto">
         {list.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <div className="mx-auto grid h-10 w-10 place-items-center rounded-full border border-steel-700 bg-steel-800 text-steel-400">
@@ -476,7 +477,7 @@ function TaskRow({
 
   if (editing) {
     return (
-      <li className="bg-steel-800/25 px-4 py-4 sm:px-5">
+      <li className="bg-steel-800/25 px-3 py-4 sm:px-5">
         <form onSubmit={handleSave} className="flex flex-col gap-3">
           <label>
             <span className="sr-only">Task title</span>
@@ -487,17 +488,17 @@ function TaskRow({
               onKeyDown={(event) => {
                 if (event.key === 'Escape') cancelEditing()
               }}
-              className="w-full rounded-lg border border-steel-600 bg-charcoal-900 px-3.5 py-2.5 text-sm text-ink placeholder:text-steel-500 focus:border-lime-500/60 focus:outline-none"
+              className="h-11 w-full rounded-lg border border-steel-600 bg-charcoal-900 px-3.5 text-base text-ink placeholder:text-steel-500 focus:border-lime-500/60 focus:outline-none sm:text-sm"
             />
           </label>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 xs:gap-2">
             <label>
               <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Priority</span>
               <select
                 value={priority}
                 onChange={(event) => setPriority(event.target.value as TaskPriority)}
-                className="h-9 w-full appearance-none rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink focus:border-lime-500/60 focus:outline-none"
+                className="h-11 w-full appearance-none rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-sm text-ink focus:border-lime-500/60 focus:outline-none sm:h-9 sm:text-xs"
               >
                 {TASK_PRIORITIES.map((value) => (
                   <option key={value} value={value}>{priorityLabels[value]}</option>
@@ -510,26 +511,26 @@ function TaskRow({
                 type="date"
                 value={dueDate}
                 onChange={(event) => setDueDate(event.target.value)}
-                className="h-9 w-full rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink focus:border-lime-500/60 focus:outline-none"
+                className="h-11 w-full rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-sm text-ink focus:border-lime-500/60 focus:outline-none sm:h-9 sm:text-xs"
               />
             </label>
           </div>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
-          <div className="flex items-center justify-end gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
             <button
               type="button"
               onClick={cancelEditing}
               disabled={saving}
-              className="rounded-lg px-3 py-2 text-xs font-medium text-ink-muted transition-colors hover:bg-steel-700 hover:text-ink disabled:opacity-50"
+              className="h-11 touch-manipulation rounded-lg border border-steel-700 px-3 text-sm font-medium text-ink-muted transition-colors hover:bg-steel-700 hover:text-ink disabled:opacity-50 sm:h-auto sm:border-transparent sm:py-2 sm:text-xs"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !title.trim()}
-              className="rounded-lg bg-lime-500 px-3.5 py-2 text-xs font-semibold text-charcoal-950 transition-colors hover:bg-lime-400 disabled:opacity-50"
+              className="h-11 touch-manipulation rounded-lg bg-lime-500 px-3.5 text-sm font-semibold text-charcoal-950 transition-colors hover:bg-lime-400 disabled:opacity-50 sm:h-auto sm:py-2 sm:text-xs"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
@@ -540,12 +541,12 @@ function TaskRow({
   }
 
   return (
-    <li className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-steel-800/35 sm:px-5">
+    <li className="group flex items-start gap-2 px-3 py-3.5 transition-colors hover:bg-steel-800/35 sm:gap-3 sm:px-5">
       <button
         type="button"
         onClick={() => void onToggle(task)}
         aria-label={task.completed ? `Mark ${task.title} incomplete` : `Complete ${task.title}`}
-        className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border transition-colors ${
+        className={`grid h-9 w-9 shrink-0 touch-manipulation place-items-center rounded-lg border transition-colors sm:mt-0.5 sm:h-5 sm:w-5 sm:rounded-md ${
           task.completed
             ? 'border-lime-500 bg-lime-500 text-charcoal-950'
             : 'border-steel-500 text-transparent hover:border-lime-500'
@@ -554,7 +555,7 @@ function TaskRow({
         <Icon name="check" className="text-xs" />
       </button>
       <div className="min-w-0 flex-1">
-        <p className={`text-sm leading-5 ${task.completed ? 'text-steel-400 line-through' : 'text-ink'}`}>
+        <p className={`break-words pt-1.5 text-sm leading-5 sm:pt-0 ${task.completed ? 'text-steel-400 line-through' : 'text-ink'}`}>
           {task.title}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -580,7 +581,7 @@ function TaskRow({
           type="button"
           onClick={startEditing}
           aria-label={`Edit ${task.title}`}
-          className="grid h-7 w-7 place-items-center rounded-md text-steel-500 transition-colors hover:bg-steel-700 hover:text-ink"
+          className="grid h-9 w-9 touch-manipulation place-items-center rounded-lg text-ink-muted transition-colors hover:bg-steel-700 hover:text-ink sm:h-7 sm:w-7 sm:rounded-md sm:text-steel-500"
         >
           <Icon name="edit" className="text-sm" />
         </button>
@@ -588,7 +589,7 @@ function TaskRow({
           type="button"
           onClick={() => void onDelete(task)}
           aria-label={`Delete ${task.title}`}
-          className="grid h-7 w-7 place-items-center rounded-md text-steel-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+          className="grid h-9 w-9 touch-manipulation place-items-center rounded-lg text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-400 sm:h-7 sm:w-7 sm:rounded-md sm:text-steel-500"
         >
           <Icon name="trash" className="text-sm" />
         </button>

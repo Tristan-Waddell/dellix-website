@@ -62,14 +62,14 @@ export function AdminLayout() {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-20 sm:pb-0">
+      <main className="flex-1 overflow-y-auto pb-24 sm:pb-0">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           <Outlet />
         </div>
       </main>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-steel-700/80 bg-charcoal-950/95 px-2 py-2 backdrop-blur sm:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-steel-700/80 bg-charcoal-950/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
         {tabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === '/'} className={({ isActive }) => tabClass(isActive)}>
             <Icon name={tab.icon} className="text-lg" />
