@@ -29,6 +29,7 @@ export type IconName =
   | 'dashboard'
   | 'clock'
   | 'dollar'
+  | 'edit'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -170,6 +171,11 @@ const paths: Record<IconName, React.ReactNode> = {
   dollar: (
     <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2v20M17 6.5c-1-1.1-2.55-1.75-4.35-1.75-2.65 0-4.65 1.4-4.65 3.5 0 5.25 9 2.25 9 7.5 0 2.1-2 3.5-4.65 3.5-2.2 0-4.1-.9-5.35-2.4" />
+    </g>
+  ),
+  edit: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13.5 6.5 17.5 10.5M4 20l4.25-1 10.9-10.9a2.12 2.12 0 0 0-3-3L5.25 16 4 20Z" />
     </g>
   ),
 }

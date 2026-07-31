@@ -103,6 +103,11 @@ export function DashboardPage() {
     setData((current) => current && {
       ...current,
       tasks: sortTasks(current.tasks.map((task) => task.id === updated.id ? updated : task)),
+      recent_activity: current.recent_activity.map((activity) => (
+        activity.kind === 'task' && activity.id === updated.id
+          ? { ...activity, label: updated.title, detail: updated.priority }
+          : activity
+      )),
     })
   }
 
@@ -322,6 +327,11 @@ function TaskPanel({
     }
   }
 
+  async function handleEdit(task: Task, changes: Pick<Task, 'title' | 'priority' | 'due_date'>) {
+    const response = await tasks.update(task.id, changes)
+    onUpdated(response.task)
+  }
+
   return (
     <section className="overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75">
       <div className="flex items-center justify-between border-b border-steel-700 px-4 py-4 sm:px-5">
@@ -393,7 +403,13 @@ function TaskPanel({
         ) : (
           <ul className="divide-y divide-steel-700/70">
             {list.map((task) => (
-              <TaskRow key={task.id} task={task} onToggle={handleToggle} onDelete={handleDelete} />
+              <TaskRow
+                key={task.id}
+                task={task}
+                onToggle={handleToggle}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </ul>
         )}
@@ -405,13 +421,123 @@ function TaskPanel({
 function TaskRow({
   task,
   onToggle,
+  onEdit,
   onDelete,
 }: {
   task: Task
   onToggle: (task: Task) => void
+  onEdit: (task: Task, changes: Pick<Task, 'title' | 'priority' | 'due_date'>) => Promise<void>
   onDelete: (task: Task) => void
 }) {
+  const [editing, setEditing] = useState(false)
+  const [title, setTitle] = useState(task.title)
+  const [priority, setPriority] = useState<TaskPriority>(task.priority)
+  const [dueDate, setDueDate] = useState(task.due_date ?? '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const due = task.due_date ? formatDueDate(task.due_date) : null
+
+  function startEditing() {
+    setTitle(task.title)
+    setPriority(task.priority)
+    setDueDate(task.due_date ?? '')
+    setError('')
+    setEditing(true)
+  }
+
+  function cancelEditing() {
+    setEditing(false)
+    setError('')
+  }
+
+  async function handleSave(event: React.FormEvent) {
+    event.preventDefault()
+    const trimmedTitle = title.trim()
+    if (!trimmedTitle) {
+      setError('Task title cannot be empty.')
+      return
+    }
+
+    setSaving(true)
+    setError('')
+    try {
+      await onEdit(task, {
+        title: trimmedTitle,
+        priority,
+        due_date: dueDate || null,
+      })
+      setEditing(false)
+    } catch (saveError) {
+      setError(saveError instanceof ApiError ? saveError.message : 'Could not save task.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <li className="bg-steel-800/25 px-4 py-4 sm:px-5">
+        <form onSubmit={handleSave} className="flex flex-col gap-3">
+          <label>
+            <span className="sr-only">Task title</span>
+            <input
+              autoFocus
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') cancelEditing()
+              }}
+              className="w-full rounded-lg border border-steel-600 bg-charcoal-900 px-3.5 py-2.5 text-sm text-ink placeholder:text-steel-500 focus:border-lime-500/60 focus:outline-none"
+            />
+          </label>
+
+          <div className="grid grid-cols-2 gap-2">
+            <label>
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Priority</span>
+              <select
+                value={priority}
+                onChange={(event) => setPriority(event.target.value as TaskPriority)}
+                className="h-9 w-full appearance-none rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink focus:border-lime-500/60 focus:outline-none"
+              >
+                {TASK_PRIORITIES.map((value) => (
+                  <option key={value} value={value}>{priorityLabels[value]}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-ink-muted">Due date</span>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+                className="h-9 w-full rounded-lg border border-steel-700 bg-charcoal-900 px-3 text-xs text-ink focus:border-lime-500/60 focus:outline-none"
+              />
+            </label>
+          </div>
+
+          {error && <p className="text-xs text-red-400">{error}</p>}
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={cancelEditing}
+              disabled={saving}
+              className="rounded-lg px-3 py-2 text-xs font-medium text-ink-muted transition-colors hover:bg-steel-700 hover:text-ink disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !title.trim()}
+              className="rounded-lg bg-lime-500 px-3.5 py-2 text-xs font-semibold text-charcoal-950 transition-colors hover:bg-lime-400 disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          </div>
+        </form>
+      </li>
+    )
+  }
 
   return (
     <li className="group flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-steel-800/35 sm:px-5">
@@ -449,14 +575,24 @@ function TaskRow({
           )}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => void onDelete(task)}
-        aria-label={`Delete ${task.title}`}
-        className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-steel-500 opacity-100 transition-colors hover:bg-red-500/10 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
-      >
-        <Icon name="trash" className="text-sm" />
-      </button>
+      <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+        <button
+          type="button"
+          onClick={startEditing}
+          aria-label={`Edit ${task.title}`}
+          className="grid h-7 w-7 place-items-center rounded-md text-steel-500 transition-colors hover:bg-steel-700 hover:text-ink"
+        >
+          <Icon name="edit" className="text-sm" />
+        </button>
+        <button
+          type="button"
+          onClick={() => void onDelete(task)}
+          aria-label={`Delete ${task.title}`}
+          className="grid h-7 w-7 place-items-center rounded-md text-steel-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+        >
+          <Icon name="trash" className="text-sm" />
+        </button>
+      </div>
     </li>
   )
 }
