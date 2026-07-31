@@ -46,6 +46,7 @@ Tokens (colors, fonts, radius) are defined in `src/index.css` under `@theme`. Pa
 src/
   data/            content — edit these
   components/       UI sections + primitives (ui/Button, ui/Section)
+  booking/          standalone Cal.com booking page served at /booking
   hooks/useReveal   subtle scroll-in animation (respects reduced-motion)
   App.tsx           page composition
   admin/            CRM admin portal (separate app, served at /admin)
