@@ -653,14 +653,13 @@ function PipelinePanel({ data }: { data: DashboardData }) {
       return { stage, count: found?.count ?? 0, value_cents: found?.value_cents ?? 0 }
     })
   }, [data.pipeline])
-  const maxValue = Math.max(...stages.map((item) => item.value_cents), 1)
 
   return (
     <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-semibold tracking-tight text-ink">Pipeline</h2>
-          <p className="mt-0.5 text-xs text-ink-muted">Value by stage</p>
+          <p className="mt-0.5 text-xs text-ink-muted">Dollar value · each bar tracks 10 deals</p>
         </div>
         <Link to="/deals" className="text-xs font-medium text-lime-500 hover:text-lime-400">View deals</Link>
       </div>
@@ -671,11 +670,22 @@ function PipelinePanel({ data }: { data: DashboardData }) {
               <span className="text-ink-muted">{stageLabels[item.stage]} <span className="text-steel-500">· {item.count}</span></span>
               <span className="font-mono text-[11px] text-ink">{formatMoney(item.value_cents)}</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-steel-800">
-              <div
-                className={`h-full rounded-full ${stageColors[item.stage]}`}
-                style={{ width: item.value_cents === 0 ? '0%' : `${Math.max((item.value_cents / maxValue) * 100, 5)}%` }}
-              />
+            <div
+              className="grid grid-cols-10 gap-0.5"
+              role="meter"
+              aria-label={`${stageLabels[item.stage]}: ${item.count} of 10 deals`}
+              aria-valuemin={0}
+              aria-valuemax={10}
+              aria-valuenow={Math.min(item.count, 10)}
+            >
+              {Array.from({ length: 10 }, (_, index) => (
+                <span
+                  key={index}
+                  className={`h-1.5 first:rounded-l-full last:rounded-r-full ${
+                    index < item.count ? stageColors[item.stage] : 'bg-steel-800'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         ))}
