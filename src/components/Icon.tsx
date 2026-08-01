@@ -33,6 +33,7 @@ export type IconName =
   | 'chart'
   | 'wallet'
   | 'refund'
+  | 'target'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -200,6 +201,13 @@ const paths: Record<IconName, React.ReactNode> = {
     <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <path d="M7 7H3v-4M3.5 7a9 9 0 1 1-.4 9" />
       <path d="M15.5 9.5c-.65-.7-1.65-1.1-2.8-1.1-1.7 0-3 .9-3 2.25 0 3.35 5.8 1.45 5.8 4.8 0 1.35-1.3 2.25-3 2.25-1.4 0-2.65-.6-3.45-1.55M12.5 6.5v13" />
+    </g>
+  ),
+  target: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
     </g>
   ),
 }

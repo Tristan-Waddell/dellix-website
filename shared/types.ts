@@ -56,6 +56,47 @@ export type Task = {
   updated_at: string
 }
 
+export type LeadStatus = 'new' | 'researching' | 'qualified' | 'contacted' | 'disqualified' | 'converted'
+export const LEAD_STATUSES: LeadStatus[] = ['new', 'researching', 'qualified', 'contacted', 'disqualified', 'converted']
+
+export type LeadPriority = 'low' | 'normal' | 'high'
+export const LEAD_PRIORITIES: LeadPriority[] = ['low', 'normal', 'high']
+
+export type Lead = {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  title: string | null
+  company_name: string | null
+  company_domain: string | null
+  website_url: string | null
+  linkedin_url: string | null
+  source: string | null
+  source_url: string | null
+  notes: string | null
+  tags: string[]
+  custom_fields: Record<string, unknown>
+  score: number
+  status: LeadStatus
+  priority: LeadPriority
+  contact_id: string | null
+  discovered_at: string
+  last_enriched_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type LeadSummary = {
+  total: number
+  new: number
+  researching: number
+  qualified: number
+  contacted: number
+  disqualified: number
+  converted: number
+}
+
 export type DashboardActivityKind = 'contact' | 'company' | 'deal' | 'task'
 
 export type DashboardActivity = {

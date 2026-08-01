@@ -1,4 +1,4 @@
-import type { Company, Contact, DashboardData, Deal, DealStage, FinancialPeriod, FinancialsData, Task } from '../../shared/types.ts'
+import type { Company, Contact, DashboardData, Deal, DealStage, FinancialPeriod, FinancialsData, Lead, LeadPriority, LeadStatus, LeadSummary, Task } from '../../shared/types.ts'
 
 class ApiError extends Error {
   status: number
@@ -47,6 +47,24 @@ export const contacts = {
   create: (data: Partial<Contact>) => request<{ contact: Contact }>('/v1/contacts', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Partial<Contact>) => request<{ contact: Contact }>(`/v1/contacts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: string) => request<void>(`/v1/contacts/${id}`, { method: 'DELETE' }),
+}
+
+export const leads = {
+  list: (filters: { q?: string; status?: LeadStatus; priority?: LeadPriority; source?: string; tag?: string; limit?: number; offset?: number; sort?: 'created' | 'updated' | 'score' } = {}) => {
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== '') params.set(key, String(value))
+    }
+    const query = params.toString()
+    return request<{ leads: Lead[]; summary: LeadSummary; pagination: { total: number; limit: number; offset: number } }>(`/v1/leads${query ? `?${query}` : ''}`)
+  },
+  get: (id: string) => request<{ lead: Lead }>(`/v1/leads/${id}`),
+  create: (data: Partial<Lead> & { name: string }) => request<{ lead: Lead; action: 'created' | 'updated' }>('/v1/leads', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: Partial<Lead> & { append_notes?: boolean; mark_enriched?: boolean }) =>
+    request<{ lead: Lead }>(`/v1/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id: string) => request<void>(`/v1/leads/${id}`, { method: 'DELETE' }),
+  convert: (id: string, options: { create_company?: boolean; is_active_client?: boolean; create_deal?: boolean; deal_name?: string; deal_value_cents?: number; deal_stage?: DealStage } = {}) =>
+    request<{ lead: Lead; contact: Contact; company: Company | null; deal: Deal | null }>(`/v1/leads/${id}/convert`, { method: 'POST', body: JSON.stringify(options) }),
 }
 
 export const companies = {

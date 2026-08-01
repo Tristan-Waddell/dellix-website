@@ -4,9 +4,10 @@ import { Wordmark } from '../../components/Wordmark.tsx'
 import { auth } from '../api.ts'
 import { useAdminAuth } from '../AdminApp.tsx'
 
-const tabs: { to: string; label: string; icon: IconName }[] = [
+const tabs: { to: string; label: string; mobileLabel?: string; icon: IconName }[] = [
   { to: '/', label: 'Overview', icon: 'dashboard' },
   { to: '/contacts', label: 'Contacts', icon: 'users' },
+  { to: '/leads', label: 'Lead Generation', mobileLabel: 'Leads', icon: 'target' },
   { to: '/companies', label: 'Companies', icon: 'building' },
   { to: '/deals', label: 'Deals', icon: 'pipeline' },
   { to: '/financials', label: 'Financials', icon: 'chart' },
@@ -38,7 +39,8 @@ export function AdminLayout() {
           {tabs.map((tab) => (
             <NavLink key={tab.to} to={tab.to} end={tab.to === '/'} className={({ isActive }) => tabClass(isActive)}>
               <Icon name={tab.icon} className="text-lg" />
-              {tab.label}
+              <span className={tab.mobileLabel ? 'hidden sm:inline' : ''}>{tab.label}</span>
+              {tab.mobileLabel && <span className="sm:hidden">{tab.mobileLabel}</span>}
             </NavLink>
           ))}
         </nav>
@@ -78,7 +80,8 @@ export function AdminLayout() {
         {tabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === '/'} className={({ isActive }) => tabClass(isActive)}>
             <Icon name={tab.icon} className="text-lg" />
-            {tab.label}
+            <span className={tab.mobileLabel ? 'hidden sm:inline' : ''}>{tab.label}</span>
+            {tab.mobileLabel && <span className="sm:hidden">{tab.mobileLabel}</span>}
           </NavLink>
         ))}
       </nav>

@@ -53,7 +53,7 @@ src/
 api/
   contact.ts        contact form → Resend
   auth/             admin login/logout/session check
-  v1/               CRM REST API (dashboard, tasks, contacts, companies, deals)
+  v1/               CRM REST API (dashboard, leads, tasks, contacts, companies, deals)
   _lib/             shared API helpers (db, auth, http)
 shared/types.ts      types shared by the API, admin UI, and CLI
 cli/dellix-crm.js    CLI for the CRM API
@@ -90,7 +90,7 @@ Named keys are stored as hashes in Postgres, can coexist, and expire only on the
 
 ### Admin portal
 
-Visit `/admin`, sign in with the password from step 2. The Overview dashboard includes live CRM totals, pipeline health, recent activity, and a persisted to-do list with priorities and due dates. Manage Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).
+Visit `/admin`, sign in with the password from step 2. The Overview dashboard includes live CRM totals, pipeline health, recent activity, and a persisted to-do list with priorities and due dates. Manage Lead Generation, Contacts, Companies, and Deals (with a simple stage pipeline: lead → contacted → proposal → won/lost).
 
 ### CLI / agent access
 
@@ -102,6 +102,9 @@ export DELLIX_API_KEY=dlx_xxxxxxxxxxxxxxxx  # from `npm run generate-api-key`
 
 node cli/dellix-crm.js contacts list
 node cli/dellix-crm.js contacts add --name "Ada Lovelace" --email ada@example.com
+node cli/dellix-crm.js leads add --name "Ada Lovelace" --email ada@example.com --source LinkedIn --score 82
+node cli/dellix-crm.js leads list --status qualified --sort score
+node cli/dellix-crm.js leads bulk ./leads.json
 node cli/dellix-crm.js deals add --name "Acme retainer" --value 5000 --stage proposal
 node cli/dellix-crm.js deals move <id> won
 node cli/dellix-crm.js dashboard
@@ -126,10 +129,17 @@ Dashboard API routes (all accept the admin session or `Authorization: Bearer …
 | --- | --- | --- |
 | `GET` | `/api/v1/dashboard` | Summary totals, pipeline breakdown, tasks, and recent activity |
 | `GET` | `/api/v1/financials?period=month\|year\|all` | Stripe revenue, balances, payouts, MRR, trend data, and client attribution |
+| `GET`, `POST` | `/api/v1/leads` | Search/filter leads or create/upsert one lead |
+| `GET` | `/api/v1/leads/options` | Machine-readable lead enums, limits, filters, and endpoints |
+| `POST` | `/api/v1/leads/bulk` | Upsert up to 100 agent-sourced leads |
+| `GET`, `PATCH`, `DELETE` | `/api/v1/leads/:id` | Read, enrich, qualify, or remove a lead |
+| `POST` | `/api/v1/leads/:id/convert` | Convert a lead into a contact, company, and optional deal |
 | `GET`, `POST` | `/api/v1/tasks` | List or create tasks |
 | `GET`, `PATCH`, `DELETE` | `/api/v1/tasks/:id` | Read, edit, complete, or remove a task |
 
 Task writes accept `title`, `priority` (`low`, `normal`, or `high`), `due_date` (`YYYY-MM-DD` or `null`), and `completed` (on `PATCH`). Dashboard totals and activity are calculated directly from the CRM records, so API changes to contacts, companies, deals, or tasks are reflected automatically.
+
+See [Lead Generation API](docs/lead-generation-api.md) for the complete ingestion schema, filters, bulk upserts, enrichment controls, conversion options, curl examples, and a suggested personal-agent workflow.
 
 ## Deploy
 

@@ -10,6 +10,7 @@ import { CompanyDetailPage } from './pages/CompanyDetailPage.tsx'
 import { DealsPage } from './pages/DealsPage.tsx'
 import { DashboardPage } from './pages/DashboardPage.tsx'
 import { FinancialsPage } from './pages/FinancialsPage.tsx'
+import { LeadGenerationPage } from './pages/LeadGenerationPage.tsx'
 
 type AuthState = 'checking' | 'authed' | 'anon'
 
@@ -66,6 +67,7 @@ export function AdminApp() {
               <Route index element={<DashboardPage />} />
               <Route path="contacts" element={<ContactsPage />} />
               <Route path="contacts/:id" element={<ContactDetailPage />} />
+              <Route path="leads" element={<LeadGenerationPage />} />
               <Route path="companies" element={<CompaniesPage />} />
               <Route path="companies/:id" element={<CompanyDetailPage />} />
               <Route path="deals" element={<DealsPage />} />

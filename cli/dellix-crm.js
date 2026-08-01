@@ -7,6 +7,7 @@
 //   DELLIX_API_KEY  API key generated via `npm run generate-api-key`
 
 import { Command } from 'commander'
+import { readFileSync } from 'node:fs'
 
 const baseUrl = process.env.DELLIX_API_URL ?? 'http://localhost:5173'
 const apiKey = process.env.DELLIX_API_KEY
@@ -117,6 +118,128 @@ function entityCommands(name, plural) {
 entityCommands('contact', 'contacts')
 entityCommands('company', 'companies')
 const dealCmd = entityCommands('deal', 'deals')
+
+const leadCmd = program.command('leads').description('Manage agent-sourced leads')
+
+leadCmd
+  .command('list')
+  .description('Search and filter leads')
+  .option('-q, --query <query>', 'search name, contact info, company, source, or notes')
+  .option('--status <status>', 'new|researching|qualified|contacted|disqualified|converted')
+  .option('--priority <priority>', 'low|normal|high')
+  .option('--source <source>', 'exact source name')
+  .option('--tag <tag>', 'required tag')
+  .option('--sort <sort>', 'created|updated|score', 'created')
+  .option('--limit <limit>', '1-100', '50')
+  .option('--offset <offset>', 'pagination offset', '0')
+  .action(async (opts) => {
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(opts)) if (value !== undefined) params.set(key, value)
+    const data = await request(`/leads?${params}`)
+    printTable(data.leads)
+  })
+
+leadCmd
+  .command('show <id>')
+  .description('Show a lead with all enrichment fields')
+  .action(async (id) => {
+    const data = await request(`/leads/${id}`)
+    console.log(JSON.stringify(data.lead, null, 2))
+  })
+
+leadCmd
+  .command('add')
+  .description('Add or upsert a lead (deduplicated by email, profile/source URL, phone, or name/company)')
+  .requiredOption('--name <name>', 'person or prospect name')
+  .option('--email <email>', 'email address')
+  .option('--phone <phone>', 'phone number')
+  .option('--title <title>', 'job title')
+  .option('--company <name>', 'company name')
+  .option('--domain <domain>', 'company domain')
+  .option('--website <url>', 'website URL')
+  .option('--linkedin <url>', 'LinkedIn URL')
+  .option('--source <source>', 'discovery source')
+  .option('--source-url <url>', 'source page URL')
+  .option('--notes <notes>', 'research notes')
+  .option('--tags <tags>', 'comma-separated tags')
+  .option('--score <score>', '0-100', '0')
+  .option('--status <status>', 'lead status', 'new')
+  .option('--priority <priority>', 'low|normal|high', 'normal')
+  .option('--custom-fields <json>', 'custom JSON object')
+  .action(async (opts) => {
+    const body = {
+      name: opts.name,
+      email: opts.email,
+      phone: opts.phone,
+      title: opts.title,
+      company_name: opts.company,
+      company_domain: opts.domain,
+      website_url: opts.website,
+      linkedin_url: opts.linkedin,
+      source: opts.source,
+      source_url: opts.sourceUrl,
+      notes: opts.notes,
+      tags: opts.tags,
+      score: Number(opts.score),
+      status: opts.status,
+      priority: opts.priority,
+      custom_fields: opts.customFields ? JSON.parse(opts.customFields) : undefined,
+    }
+    const data = await request('/leads', { method: 'POST', body })
+    console.log(JSON.stringify(data, null, 2))
+  })
+
+leadCmd
+  .command('update <id>')
+  .description('Patch any lead fields using a JSON object')
+  .requiredOption('--data <json>', 'JSON object with fields to update')
+  .action(async (id, opts) => {
+    const data = await request(`/leads/${id}`, { method: 'PATCH', body: JSON.parse(opts.data) })
+    console.log(JSON.stringify(data.lead, null, 2))
+  })
+
+leadCmd
+  .command('bulk <json-file>')
+  .description('Bulk upsert up to 100 leads from a JSON array or {"leads": [...]} file')
+  .option('--replace-notes', 'replace notes instead of appending')
+  .option('--replace-tags', 'replace tags instead of merging')
+  .action(async (jsonFile, opts) => {
+    const parsed = JSON.parse(readFileSync(jsonFile, 'utf8'))
+    const body = Array.isArray(parsed) ? { leads: parsed } : parsed
+    body.notes_mode = opts.replaceNotes ? 'replace' : 'append'
+    body.tags_mode = opts.replaceTags ? 'replace' : 'merge'
+    const data = await request('/leads/bulk', { method: 'POST', body })
+    console.log(JSON.stringify(data, null, 2))
+  })
+
+leadCmd
+  .command('convert <id>')
+  .description('Convert a lead into a CRM contact, optionally creating a company and deal')
+  .option('--active-client', 'mark the resulting contact as an active client')
+  .option('--create-deal', 'create a pipeline deal')
+  .option('--deal-name <name>', 'deal name')
+  .option('--deal-value <dollars>', 'deal value in dollars')
+  .option('--deal-stage <stage>', 'lead|contacted|proposal|won|lost', 'lead')
+  .action(async (id, opts) => {
+    const body = {
+      create_company: true,
+      is_active_client: Boolean(opts.activeClient),
+      create_deal: Boolean(opts.createDeal),
+      deal_name: opts.dealName,
+      deal_value_cents: opts.dealValue ? Math.round(Number(opts.dealValue) * 100) : undefined,
+      deal_stage: opts.dealStage,
+    }
+    const data = await request(`/leads/${id}/convert`, { method: 'POST', body })
+    console.log(JSON.stringify(data, null, 2))
+  })
+
+leadCmd
+  .command('delete <id>')
+  .description('Delete a lead')
+  .action(async (id) => {
+    await request(`/leads/${id}`, { method: 'DELETE' })
+    console.log('Deleted.')
+  })
 
 dealCmd
   .command('move <id> <stage>')
