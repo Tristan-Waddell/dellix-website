@@ -19,11 +19,13 @@ create table if not exists contacts (
   title text,
   notes text,
   is_active_client boolean not null default false,
+  stripe_customer_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 alter table contacts add column if not exists is_active_client boolean not null default false;
+alter table contacts add column if not exists stripe_customer_id text;
 
 create table if not exists deals (
   id uuid primary key default gen_random_uuid(),
@@ -60,6 +62,7 @@ create table if not exists api_keys (
 
 create index if not exists contacts_company_id_idx on contacts (company_id);
 create index if not exists contacts_active_clients_idx on contacts (is_active_client) where is_active_client = true;
+create unique index if not exists contacts_stripe_customer_id_idx on contacts (stripe_customer_id) where stripe_customer_id is not null;
 create index if not exists deals_contact_id_idx on deals (contact_id);
 create index if not exists deals_company_id_idx on deals (company_id);
 create index if not exists deals_stage_idx on deals (stage);

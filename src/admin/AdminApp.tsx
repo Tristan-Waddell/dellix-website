@@ -9,6 +9,7 @@ import { CompaniesPage } from './pages/CompaniesPage.tsx'
 import { CompanyDetailPage } from './pages/CompanyDetailPage.tsx'
 import { DealsPage } from './pages/DealsPage.tsx'
 import { DashboardPage } from './pages/DashboardPage.tsx'
+import { FinancialsPage } from './pages/FinancialsPage.tsx'
 
 type AuthState = 'checking' | 'authed' | 'anon'
 
@@ -68,6 +69,7 @@ export function AdminApp() {
               <Route path="companies" element={<CompaniesPage />} />
               <Route path="companies/:id" element={<CompanyDetailPage />} />
               <Route path="deals" element={<DealsPage />} />
+              <Route path="financials" element={<FinancialsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

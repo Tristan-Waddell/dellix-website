@@ -36,12 +36,13 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
     const title = optionalString(body.title)
     const notes = optionalString(body.notes)
     const companyId = optionalString(body.company_id)
+    const stripeCustomerId = optionalString(body.stripe_customer_id)
     const isActiveClient = body.is_active_client ?? false
     if (typeof isActiveClient !== 'boolean') throw new HttpError(400, '"is_active_client" must be a boolean.')
 
     const rows = await sql`
-      insert into contacts (name, email, phone, title, notes, company_id, is_active_client)
-      values (${name}, ${email}, ${phone}, ${title}, ${notes}, ${companyId}, ${isActiveClient})
+      insert into contacts (name, email, phone, title, notes, company_id, is_active_client, stripe_customer_id)
+      values (${name}, ${email}, ${phone}, ${title}, ${notes}, ${companyId}, ${isActiveClient}, ${stripeCustomerId})
       returning *
     `
     res.status(201).json({ contact: rows[0] })

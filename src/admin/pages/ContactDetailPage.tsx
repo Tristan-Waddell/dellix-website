@@ -39,6 +39,7 @@ export function ContactDetailPage() {
         notes: contact.notes,
         company_id: contact.company_id,
         is_active_client: contact.is_active_client,
+        stripe_customer_id: contact.stripe_customer_id,
       })
       setContact(res.contact)
       setStatus('saved')
@@ -102,6 +103,15 @@ export function ContactDetailPage() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+        </Field>
+        <Field label="Stripe customer ID" htmlFor="d-stripe-customer">
+          <input
+            id="d-stripe-customer"
+            value={contact.stripe_customer_id ?? ''}
+            onChange={(e) => update('stripe_customer_id', e.target.value || null)}
+            placeholder="cus_…"
+            className={inputClass}
+          />
         </Field>
         <Field label="Notes" htmlFor="d-notes">
           <textarea id="d-notes" rows={4} value={contact.notes ?? ''} onChange={(e) => update('notes', e.target.value)} className={`${inputClass} resize-none`} />

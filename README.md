@@ -76,6 +76,10 @@ A small HubSpot-style CRM (contacts, companies, deals) lives behind `/admin`, li
 3. Apply the schema: `npm run db:migrate`.
 4. Add the same env vars to the Vercel project settings for production.
 
+For the Financials section, create a read-only restricted Stripe key with access to balances,
+balance transactions, payouts, charges, and subscriptions. Store it as `STRIPE_RESTRICTED_KEY`
+in Vercel and `.env`; never expose it to browser code or commit it.
+
 Create additional agent keys without replacing or disabling the original environment key:
 
 ```bash
@@ -101,6 +105,7 @@ node cli/dellix-crm.js contacts add --name "Ada Lovelace" --email ada@example.co
 node cli/dellix-crm.js deals add --name "Acme retainer" --value 5000 --stage proposal
 node cli/dellix-crm.js deals move <id> won
 node cli/dellix-crm.js dashboard
+node cli/dellix-crm.js financials --period year
 node cli/dellix-crm.js tasks add --title "Send proposal" --priority high --due 2026-08-01
 node cli/dellix-crm.js tasks complete <id>
 ```
@@ -120,6 +125,7 @@ Dashboard API routes (all accept the admin session or `Authorization: Bearer …
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/v1/dashboard` | Summary totals, pipeline breakdown, tasks, and recent activity |
+| `GET` | `/api/v1/financials?period=month\|year\|all` | Stripe revenue, balances, payouts, MRR, trend data, and client attribution |
 | `GET`, `POST` | `/api/v1/tasks` | List or create tasks |
 | `GET`, `PATCH`, `DELETE` | `/api/v1/tasks/:id` | Read, edit, complete, or remove a task |
 

@@ -9,10 +9,11 @@ const tabs: { to: string; label: string; icon: IconName }[] = [
   { to: '/contacts', label: 'Contacts', icon: 'users' },
   { to: '/companies', label: 'Companies', icon: 'building' },
   { to: '/deals', label: 'Deals', icon: 'pipeline' },
+  { to: '/financials', label: 'Financials', icon: 'chart' },
 ]
 
 function tabClass(active: boolean) {
-  return `flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium transition-colors sm:flex-row sm:justify-start sm:gap-2.5 sm:px-3 sm:py-2.5 sm:text-sm ${
+  return `flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-medium transition-colors xs:text-xs sm:flex-row sm:justify-start sm:gap-2.5 sm:px-3 sm:py-2.5 sm:text-sm ${
     active ? 'text-lime-500 sm:bg-lime-500/10' : 'text-ink-muted hover:text-ink'
   }`
 }

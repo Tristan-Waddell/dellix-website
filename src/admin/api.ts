@@ -1,4 +1,4 @@
-import type { Company, Contact, DashboardData, Deal, DealStage, Task } from '../../shared/types.ts'
+import type { Company, Contact, DashboardData, Deal, DealStage, FinancialPeriod, FinancialsData, Task } from '../../shared/types.ts'
 
 class ApiError extends Error {
   status: number
@@ -67,6 +67,11 @@ export const deals = {
 
 export const dashboard = {
   get: () => request<{ dashboard: DashboardData }>('/v1/dashboard'),
+}
+
+export const financials = {
+  get: (period: FinancialPeriod = 'year', currency = 'usd') =>
+    request<{ financials: FinancialsData }>(`/v1/financials?period=${period}&currency=${currency}`),
 }
 
 export const tasks = {

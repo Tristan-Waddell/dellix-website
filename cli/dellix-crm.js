@@ -85,6 +85,7 @@ function entityCommands(name, plural) {
     .option('--value <dollars>', 'deal value in dollars (deals)')
     .option('--notes <notes>', 'notes')
     .option('--active-client', 'mark as an active client (contacts)')
+    .option('--stripe-customer-id <id>', 'linked Stripe customer ID (contacts)')
     .action(async (opts) => {
       const body = { name: opts.name, notes: opts.notes }
       if (opts.email) body.email = opts.email
@@ -96,6 +97,7 @@ function entityCommands(name, plural) {
       if (opts.stage) body.stage = opts.stage
       if (opts.value) body.value_cents = Math.round(Number(opts.value) * 100)
       if (opts.activeClient) body.is_active_client = true
+      if (opts.stripeCustomerId) body.stripe_customer_id = opts.stripeCustomerId
 
       const data = await request(`/${plural}`, { method: 'POST', body })
       console.log(JSON.stringify(data[name], null, 2))
@@ -130,6 +132,17 @@ program
   .action(async () => {
     const data = await request('/dashboard')
     console.log(JSON.stringify(data.dashboard, null, 2))
+  })
+
+program
+  .command('financials')
+  .description('Show Stripe revenue, balances, payouts, MRR, and client totals')
+  .option('--period <period>', 'month|year|all', 'year')
+  .option('--currency <currency>', 'three-letter currency code', 'usd')
+  .action(async (opts) => {
+    const params = new URLSearchParams({ period: opts.period, currency: opts.currency })
+    const data = await request(`/financials?${params}`)
+    console.log(JSON.stringify(data.financials, null, 2))
   })
 
 const taskCmd = program.command('tasks').description('Manage dashboard tasks')

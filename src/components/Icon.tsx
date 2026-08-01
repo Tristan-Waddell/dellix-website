@@ -30,6 +30,9 @@ export type IconName =
   | 'clock'
   | 'dollar'
   | 'edit'
+  | 'chart'
+  | 'wallet'
+  | 'refund'
 
 type Props = SVGProps<SVGSVGElement> & { name: IconName }
 
@@ -176,6 +179,27 @@ const paths: Record<IconName, React.ReactNode> = {
   edit: (
     <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <path d="M13.5 6.5 17.5 10.5M4 20l4.25-1 10.9-10.9a2.12 2.12 0 0 0-3-3L5.25 16 4 20Z" />
+    </g>
+  ),
+  chart: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 20V4M4 20h16M7 15l3-4 3 2 5-7" />
+      <circle cx="7" cy="15" r="1" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="11" r="1" fill="currentColor" stroke="none" />
+      <circle cx="13" cy="13" r="1" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" />
+    </g>
+  ),
+  wallet: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H19a1 1 0 0 1 1 1v15H6.5A2.5 2.5 0 0 1 4 17.5v-11Z" />
+      <path d="M4 7h16M15 11h6v5h-6a2.5 2.5 0 0 1 0-5Z" />
+    </g>
+  ),
+  refund: (
+    <g fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 7H3v-4M3.5 7a9 9 0 1 1-.4 9" />
+      <path d="M15.5 9.5c-.65-.7-1.65-1.1-2.8-1.1-1.7 0-3 .9-3 2.25 0 3.35 5.8 1.45 5.8 4.8 0 1.35-1.3 2.25-3 2.25-1.4 0-2.65-.6-3.45-1.55M12.5 6.5v13" />
     </g>
   ),
 }

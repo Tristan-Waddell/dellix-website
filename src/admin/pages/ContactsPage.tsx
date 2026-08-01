@@ -140,11 +140,12 @@ function AddContactModal({
   const [title, setTitle] = useState('')
   const [companyId, setCompanyId] = useState('')
   const [isActiveClient, setIsActiveClient] = useState(false)
+  const [stripeCustomerId, setStripeCustomerId] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   function reset() {
-    setName(''); setEmail(''); setPhone(''); setTitle(''); setCompanyId(''); setIsActiveClient(false); setError('')
+    setName(''); setEmail(''); setPhone(''); setTitle(''); setCompanyId(''); setIsActiveClient(false); setStripeCustomerId(''); setError('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -152,7 +153,15 @@ function AddContactModal({
     setSubmitting(true)
     setError('')
     try {
-      await contacts.create({ name, email, phone, title, company_id: companyId || null, is_active_client: isActiveClient })
+      await contacts.create({
+        name,
+        email,
+        phone,
+        title,
+        company_id: companyId || null,
+        is_active_client: isActiveClient,
+        stripe_customer_id: stripeCustomerId || null,
+      })
       reset()
       onClose()
       onCreated()
@@ -185,6 +194,15 @@ function AddContactModal({
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+        </Field>
+        <Field label="Stripe customer ID" htmlFor="c-stripe-customer">
+          <input
+            id="c-stripe-customer"
+            value={stripeCustomerId}
+            onChange={(e) => setStripeCustomerId(e.target.value)}
+            placeholder="cus_…"
+            className={inputClass}
+          />
         </Field>
 
         <label className="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-steel-700 bg-charcoal-850 px-3.5 py-3">

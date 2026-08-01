@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon, type IconName } from '../../components/Icon.tsx'
-import { dashboard, tasks, ApiError } from '../api.ts'
+import { RevenueChart } from '../components/RevenueChart.tsx'
+import { dashboard, financials, tasks, ApiError } from '../api.ts'
 import {
   DEAL_STAGES,
   TASK_PRIORITIES,
@@ -10,6 +11,7 @@ import {
   type DealStage,
   type Task,
   type TaskPriority,
+  type FinancialsData,
 } from '../../../shared/types.ts'
 
 const stageLabels: Record<DealStage, string> = {
@@ -83,6 +85,8 @@ function sortTasks(list: Task[]) {
 
 export function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [financialData, setFinancialData] = useState<FinancialsData | null>(null)
+  const [financialError, setFinancialError] = useState('')
   const [loadError, setLoadError] = useState('')
 
   const load = useCallback(async () => {
@@ -98,6 +102,12 @@ export function DashboardPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    financials.get('year')
+      .then((response) => setFinancialData(response.financials))
+      .catch((error) => setFinancialError(error instanceof ApiError ? error.message : 'Could not load Stripe financials.'))
+  }, [])
 
   function replaceTask(updated: Task) {
     setData((current) => current && {
@@ -177,6 +187,8 @@ export function DashboardPage() {
         <>
           <SummaryCards data={data} />
 
+          <DashboardFinancials data={financialData} error={financialError} />
+
           <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
             <TaskPanel
               list={data.tasks}
@@ -195,6 +207,57 @@ export function DashboardPage() {
         <DashboardSkeleton />
       )}
     </div>
+  )
+}
+
+function DashboardFinancials({ data, error }: { data: FinancialsData | null; error: string }) {
+  if (error && !data) {
+    return (
+      <section className="rounded-[var(--radius-card)] border border-red-500/25 bg-red-500/10 px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-ink">Stripe financials unavailable</p>
+            <p className="mt-0.5 truncate text-xs text-red-300">{error}</p>
+          </div>
+          <Link to="/financials" className="shrink-0 text-xs font-medium text-lime-500">View details</Link>
+        </div>
+      </section>
+    )
+  }
+
+  if (!data) {
+    return <div className="h-80 animate-pulse rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75" />
+  }
+
+  const highlights = [
+    { label: 'Gross YTD', value: formatMoney(data.metrics.gross_cents), color: 'text-lime-500' },
+    { label: 'Net YTD', value: formatMoney(data.metrics.net_cents), color: 'text-ink' },
+    { label: 'Available', value: formatMoney(data.metrics.available_cents), color: 'text-ink' },
+    { label: 'MRR', value: data.metrics.mrr_cents === null ? '—' : formatMoney(data.metrics.mrr_cents), color: 'text-ink' },
+  ]
+
+  return (
+    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75">
+      <div className="flex items-start justify-between gap-3 border-b border-steel-700 px-4 py-4 sm:px-5">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-lime-500">Revenue</p>
+          <h2 className="mt-0.5 font-semibold tracking-tight text-ink">Financial pulse</h2>
+          <p className="mt-0.5 text-xs text-ink-muted">Year to date · rolling 12-month trend</p>
+        </div>
+        <Link to="/financials" className="shrink-0 text-xs font-medium text-lime-500 hover:text-lime-400">View financials</Link>
+      </div>
+      <div className="grid min-w-0 gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
+        <RevenueChart data={data.monthly_revenue} currency={data.currency} compact />
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+          {highlights.map((highlight) => (
+            <div key={highlight.label} className="rounded-xl border border-steel-700 bg-charcoal-850 px-3.5 py-3">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-ink-muted">{highlight.label}</p>
+              <p className={`mt-1 truncate text-lg font-semibold tracking-tight ${highlight.color}`}>{highlight.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 

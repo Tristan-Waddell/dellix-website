@@ -25,6 +25,7 @@ export type Contact = {
   title: string | null
   notes: string | null
   is_active_client: boolean
+  stripe_customer_id: string | null
   created_at: string
   updated_at: string
 }
@@ -80,6 +81,53 @@ export type DashboardData = {
   }>
   tasks: Task[]
   recent_activity: DashboardActivity[]
+}
+
+export type FinancialPeriod = 'month' | 'year' | 'all'
+
+export type FinancialActivity = {
+  id: string
+  type: 'payment' | 'refund' | 'dispute' | 'payout' | 'fee' | 'other'
+  description: string
+  amount_cents: number
+  fee_cents: number
+  net_cents: number
+  currency: string
+  status: string
+  created_at: string
+}
+
+export type FinancialsData = {
+  period: FinancialPeriod
+  period_start: string | null
+  currency: string
+  updated_at: string
+  metrics: {
+    gross_cents: number
+    fees_cents: number
+    refunds_cents: number
+    disputes_cents: number
+    net_cents: number
+    payouts_cents: number
+    available_cents: number
+    pending_cents: number
+    mrr_cents: number | null
+  }
+  monthly_revenue: Array<{
+    month: string
+    gross_cents: number
+    net_cents: number
+  }>
+  recent_activity: FinancialActivity[]
+  client_revenue: Array<{
+    contact_id: string
+    name: string
+    stripe_customer_id: string
+    gross_cents: number
+    refunded_cents: number
+    net_cents: number
+  }>
+  warnings: string[]
 }
 
 export type ApiError = { error: string }
