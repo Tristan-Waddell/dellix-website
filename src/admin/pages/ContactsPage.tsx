@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Icon } from '../../components/Icon.tsx'
 import { Modal, Field, inputClass } from '../components/Modal.tsx'
 import { contacts, companies, ApiError } from '../api.ts'
@@ -9,7 +9,8 @@ export function ContactsPage() {
   const [list, setList] = useState<Contact[] | null>(null)
   const [companyList, setCompanyList] = useState<Company[]>([])
   const [query, setQuery] = useState('')
-  const [activeOnly, setActiveOnly] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeOnly = searchParams.get('active') === 'true'
   const [modalOpen, setModalOpen] = useState(false)
 
   function reload(q?: string, onlyActive = activeOnly) {
@@ -28,6 +29,13 @@ export function ContactsPage() {
 
   function companyName(id: string | null) {
     return companyList.find((c) => c.id === id)?.name ?? null
+  }
+
+  function setActiveFilter(active: boolean) {
+    const next = new URLSearchParams(searchParams)
+    if (active) next.set('active', 'true')
+    else next.delete('active')
+    setSearchParams(next, { replace: true })
   }
 
   return (
@@ -58,7 +66,7 @@ export function ContactsPage() {
       <div className="flex items-center gap-2" aria-label="Contact filters">
         <button
           type="button"
-          onClick={() => setActiveOnly(false)}
+          onClick={() => setActiveFilter(false)}
           className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
             !activeOnly ? 'bg-lime-500 text-charcoal-950' : 'border border-steel-700 text-ink-muted hover:text-ink'
           }`}
@@ -67,7 +75,7 @@ export function ContactsPage() {
         </button>
         <button
           type="button"
-          onClick={() => setActiveOnly(true)}
+          onClick={() => setActiveFilter(true)}
           className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
             activeOnly ? 'bg-lime-500 text-charcoal-950' : 'border border-steel-700 text-ink-muted hover:text-ink'
           }`}

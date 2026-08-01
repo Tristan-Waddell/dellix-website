@@ -223,11 +223,11 @@ function SummaryCards({ data }: { data: DashboardData }) {
       to: '/contacts',
     },
     {
-      label: 'Companies',
-      value: data.summary.companies.toLocaleString(),
-      note: 'Organizations tracked',
-      icon: 'building',
-      to: '/companies',
+      label: 'Active clients',
+      value: data.summary.active_clients.toLocaleString(),
+      note: 'Current client relationships',
+      icon: 'users',
+      to: '/contacts?active=true',
     },
     {
       label: 'To-do',

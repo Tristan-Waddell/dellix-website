@@ -24,6 +24,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
       select
         (select count(*) from contacts)::int as contacts,
         (select count(*) from companies)::int as companies,
+        (select count(*) from contacts where is_active_client = true)::int as active_clients,
         (select count(*) from deals where stage not in ('won', 'lost'))::int as active_deals,
         (select coalesce(sum(value_cents), 0) from deals where stage not in ('won', 'lost'))::bigint as open_pipeline_cents
     `,
@@ -59,6 +60,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
     summary: {
       contacts: Number(summary?.contacts ?? 0),
       companies: Number(summary?.companies ?? 0),
+      active_clients: Number(summary?.active_clients ?? 0),
       active_deals: Number(summary?.active_deals ?? 0),
       open_pipeline_cents: Number(summary?.open_pipeline_cents ?? 0),
     },

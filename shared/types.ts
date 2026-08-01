@@ -69,6 +69,7 @@ export type DashboardData = {
   summary: {
     contacts: number
     companies: number
+    active_clients: number
     active_deals: number
     open_pipeline_cents: number
   }
