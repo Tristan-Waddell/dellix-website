@@ -93,19 +93,27 @@ export function ContactsPage() {
               to={`/contacts/${c.id}`}
               className="flex items-center justify-between gap-3 rounded-lg border border-steel-700 bg-steel-900 px-4 py-3.5 transition-colors hover:border-steel-600"
             >
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-2">
-                  <p className="truncate font-medium text-ink">{c.name}</p>
-                  {c.is_active_client && (
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded bg-lime-500/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-lime-500">
-                      <span className="h-1.5 w-1.5 rounded-full bg-lime-500" aria-hidden="true" />
-                      Active
-                    </span>
-                  )}
+              <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)] sm:items-center">
+                <div className="col-span-2 min-w-0 sm:col-span-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate font-medium text-ink">{c.name}</p>
+                    {c.is_active_client && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded bg-lime-500/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-lime-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-lime-500" aria-hidden="true" />
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="truncate text-xs text-ink-muted">{companyName(c.company_id) || 'No company'}</p>
                 </div>
-                <p className="truncate text-sm text-ink-muted">
-                  {[c.email, companyName(c.company_id)].filter(Boolean).join(' · ') || '—'}
-                </p>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-steel-500">Email</p>
+                  <p className="truncate text-sm text-ink-muted">{c.email || '—'}</p>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-steel-500">Phone</p>
+                  <p className="truncate text-sm text-ink-muted">{c.phone || '—'}</p>
+                </div>
               </div>
               <Icon name="arrow" className="shrink-0 text-ink-muted" />
             </Link>
