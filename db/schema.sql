@@ -71,9 +71,12 @@ create table if not exists leads (
   contact_id uuid references contacts (id) on delete set null,
   discovered_at timestamptz not null default now(),
   last_enriched_at timestamptz,
+  viewed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table leads add column if not exists viewed_at timestamptz;
 
 create table if not exists api_keys (
   id uuid primary key default gen_random_uuid(),
@@ -97,4 +100,5 @@ create index if not exists leads_status_priority_idx on leads (status, priority,
 create index if not exists leads_created_at_idx on leads (created_at desc);
 create index if not exists leads_contact_id_idx on leads (contact_id);
 create index if not exists leads_source_idx on leads (source);
+create index if not exists leads_unviewed_idx on leads (created_at desc) where viewed_at is null;
 create index if not exists api_keys_active_idx on api_keys (expires_at) where revoked_at is null;

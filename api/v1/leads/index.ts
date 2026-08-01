@@ -30,6 +30,9 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
     const source = queryValue(req.query.source)
     const tag = queryValue(req.query.tag)
     const tagFilter = tag ? JSON.stringify([tag.toLowerCase()]) : null
+    const rawViewed = queryValue(req.query.viewed)
+    if (rawViewed && !['true', 'false'].includes(rawViewed)) throw new HttpError(400, '"viewed" must be true or false.')
+    const viewed = rawViewed === null ? null : rawViewed === 'true'
     const limit = parseInteger(req.query.limit, 50, 1, 100)
     const offset = parseInteger(req.query.offset, 0, 0, 1_000_000)
     const sort = queryValue(req.query.sort) ?? 'created'
@@ -45,6 +48,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
           and (${priority}::text is null or priority = ${priority})
           and (${source}::text is null or lower(source) = lower(${source}))
           and (${tagFilter}::jsonb is null or tags @> ${tagFilter}::jsonb)
+          and (${viewed}::boolean is null or (${viewed} = true and viewed_at is not null) or (${viewed} = false and viewed_at is null))
         order by
           case when ${sort} = 'score' then score end desc,
           case when ${sort} = 'updated' then updated_at end desc,
@@ -61,6 +65,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
           and (${priority}::text is null or priority = ${priority})
           and (${source}::text is null or lower(source) = lower(${source}))
           and (${tagFilter}::jsonb is null or tags @> ${tagFilter}::jsonb)
+          and (${viewed}::boolean is null or (${viewed} = true and viewed_at is not null) or (${viewed} = false and viewed_at is null))
       `,
       sql`
         select
@@ -70,7 +75,8 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
           count(*) filter (where status = 'qualified')::int as qualified,
           count(*) filter (where status = 'contacted')::int as contacted,
           count(*) filter (where status = 'disqualified')::int as disqualified,
-          count(*) filter (where status = 'converted')::int as converted
+          count(*) filter (where status = 'converted')::int as converted,
+          count(*) filter (where viewed_at is null)::int as unviewed
         from leads
       `,
     ])

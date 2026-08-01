@@ -33,6 +33,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
       priority: 'one of priorities',
       discovered_at: 'ISO-8601 timestamp',
       last_enriched_at: 'ISO-8601 timestamp or null',
+      viewed_at: 'ISO-8601 timestamp or null; null means the lead has not been opened with View more',
     },
     deduplication_order: ['email', 'linkedin_url', 'source_url', 'phone', 'name+company_name'],
     write_options: {
@@ -42,8 +43,9 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
       append_notes: 'PATCH-only boolean',
       merge_tags: 'PATCH-only boolean',
       mark_enriched: 'boolean; updates last_enriched_at',
+      mark_viewed: 'PATCH-only boolean; true marks viewed, false marks new/unviewed',
     },
-    filters: ['q', 'status', 'priority', 'source', 'tag', 'sort', 'limit', 'offset'],
+    filters: ['q', 'status', 'priority', 'source', 'tag', 'viewed', 'sort', 'limit', 'offset'],
     sort: ['created', 'updated', 'score'],
     endpoints: {
       list_or_create: '/api/v1/leads',

@@ -40,6 +40,7 @@ const emptySummary: LeadSummary = {
   contacted: 0,
   disqualified: 0,
   converted: 0,
+  unviewed: 0,
 }
 
 export function LeadGenerationPage() {
@@ -118,9 +119,33 @@ export function LeadGenerationPage() {
     setModalOpen(true)
   }
 
+  function openDetails(lead: Lead) {
+    if (lead.viewed_at) {
+      setViewingLead(lead)
+      return
+    }
+
+    const optimistic = { ...lead, viewed_at: new Date().toISOString() }
+    setViewingLead(optimistic)
+    setList((current) => current?.map((item) => item.id === lead.id ? optimistic : item) ?? null)
+    setSummary((current) => ({ ...current, unviewed: Math.max(0, current.unviewed - 1) }))
+
+    void leads.update(lead.id, { mark_viewed: true })
+      .then((response) => {
+        setList((current) => current?.map((item) => item.id === lead.id ? response.lead : item) ?? null)
+        setViewingLead((current) => current?.id === lead.id ? response.lead : current)
+      })
+      .catch((viewError) => {
+        setList((current) => current?.map((item) => item.id === lead.id ? lead : item) ?? null)
+        setViewingLead((current) => current?.id === lead.id ? lead : current)
+        setSummary((current) => ({ ...current, unviewed: current.unviewed + 1 }))
+        setError(viewError instanceof ApiError ? viewError.message : 'Could not mark this lead as viewed.')
+      })
+  }
+
   const summaryCards = [
     { label: 'All leads', value: summary.total, color: 'text-ink' },
-    { label: 'New', value: summary.new, color: 'text-ink' },
+    { label: 'New to review', value: summary.unviewed, color: 'text-lime-500' },
     { label: 'Qualified', value: summary.qualified, color: 'text-lime-500' },
     { label: 'Converted', value: summary.converted, color: 'text-lime-400' },
   ]
@@ -209,6 +234,7 @@ export function LeadGenerationPage() {
                 <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <h2 className="truncate font-semibold text-ink">{lead.name}</h2>
+                    {!lead.viewed_at && <span className="shrink-0 rounded bg-lime-500 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wide text-charcoal-950">New</span>}
                     {lead.priority === 'high' && <span className="h-2 w-2 shrink-0 rounded-full bg-red-400" title="High priority" />}
                   </div>
                   <p className="truncate text-xs text-ink-muted">{[lead.title, lead.company_name].filter(Boolean).join(' · ') || 'Company not added'}</p>
@@ -240,7 +266,7 @@ export function LeadGenerationPage() {
                   {LEAD_STATUSES.map((value) => <option key={value} value={value}>{statusLabels[value]}</option>)}
                 </select>
                 <div className="flex flex-wrap items-center gap-1 sm:ml-auto">
-                  <button type="button" onClick={() => setViewingLead(lead)} className="rounded-lg px-2.5 py-2 text-xs font-medium text-lime-500 hover:bg-lime-500/10">View more</button>
+                  <button type="button" onClick={() => openDetails(lead)} className="rounded-lg px-2.5 py-2 text-xs font-medium text-lime-500 hover:bg-lime-500/10">View more</button>
                   <button type="button" onClick={() => openEdit(lead)} className="rounded-lg px-2.5 py-2 text-xs text-ink-muted hover:bg-steel-800 hover:text-ink">Edit</button>
                   {lead.status === 'converted' && lead.contact_id ? (
                     <Link to={`/contacts/${lead.contact_id}`} className="rounded-lg bg-lime-500/10 px-2.5 py-2 text-xs font-medium text-lime-500">View contact</Link>
@@ -402,6 +428,7 @@ function LeadDetailModal({ lead, onClose, onEdit }: { lead: Lead | null; onClose
           <div className="grid grid-cols-1 gap-4 xs:grid-cols-2">
             <DetailValue label="Discovered" value={formatDetailDate(lead.discovered_at)} />
             <DetailValue label="Last enriched" value={formatDetailDate(lead.last_enriched_at)} />
+            <DetailValue label="First viewed" value={formatDetailDate(lead.viewed_at)} />
             <DetailValue label="Created" value={formatDetailDate(lead.created_at)} />
             <DetailValue label="Last updated" value={formatDetailDate(lead.updated_at)} />
             <DetailValue label="Lead ID" value={lead.id} mono />

@@ -35,7 +35,7 @@ Do not call `https://dellix.dev`; its redirect to `www` can cause HTTP clients t
 | `score` | integer 0–100 | Lead quality/fit score |
 | `status` | enum | `new`, `researching`, `qualified`, `contacted`, `disqualified`, `converted` |
 | `priority` | enum | `low`, `normal`, `high` |
-| `discovered_at`, `last_enriched_at` | ISO-8601 timestamp | Research timing |
+| `discovered_at`, `last_enriched_at`, `viewed_at` | ISO-8601 timestamp | Research and review timing; `viewed_at: null` means new/unviewed |
 
 Single and bulk creates upsert by default. Deduplication uses the first available identity in this order: email, LinkedIn URL, source URL, phone, then name plus company. Repeated research runs enrich the existing lead instead of creating a duplicate. By default, upserts append notes, merge tags, and merge `custom_fields`.
 
@@ -96,10 +96,10 @@ The response includes a result for every input index plus `created`, `updated`, 
 ## Search, filter, and paginate
 
 ```http
-GET /api/v1/leads?q=automation&status=qualified&priority=high&source=LinkedIn&tag=b2b&sort=score&limit=50&offset=0
+GET /api/v1/leads?q=automation&status=qualified&priority=high&source=LinkedIn&tag=b2b&viewed=false&sort=score&limit=50&offset=0
 ```
 
-All parameters are optional. `sort` accepts `created`, `updated`, or `score`; `limit` is capped at 100. The response includes global status totals and pagination metadata.
+All parameters are optional. `viewed=false` returns only new/unviewed leads. `sort` accepts `created`, `updated`, or `score`; `limit` is capped at 100. The response includes global status and unviewed totals plus pagination metadata.
 
 ## Read, update, append research, or delete
 
@@ -114,6 +114,7 @@ Any lead field can be patched. These update controls are also available:
 - `append_notes: true` appends the supplied `notes` with a paragraph break.
 - `merge_tags: true` merges supplied tags instead of replacing them.
 - `mark_enriched: true` sets `last_enriched_at` to the current time.
+- `mark_viewed: true` marks the lead reviewed; `mark_viewed: false` marks it new/unviewed again.
 
 ```bash
 curl -X PATCH "$DELLIX_API_URL/api/v1/leads/LEAD_ID" \

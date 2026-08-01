@@ -85,6 +85,8 @@ function dedupeKey(lead: Pick<Lead, 'email' | 'linkedin_url' | 'source_url' | 'p
 function normalizeLead(body: Record<string, unknown>, existing?: LeadRow): LeadRow {
   const name = has(body, 'name') ? requireString(body.name, 'name') : existing?.name
   if (!name) throw new HttpError(400, '"name" is required.')
+  if (body.mark_enriched !== undefined && typeof body.mark_enriched !== 'boolean') throw new HttpError(400, '"mark_enriched" must be a boolean.')
+  if (body.mark_viewed !== undefined && typeof body.mark_viewed !== 'boolean') throw new HttpError(400, '"mark_viewed" must be a boolean.')
 
   const lead: LeadRow = {
     id: existing?.id ?? '',
@@ -108,9 +110,13 @@ function normalizeLead(body: Record<string, unknown>, existing?: LeadRow): LeadR
     contact_id: existing?.contact_id ?? null,
     discovered_at: parseTimestamp(body.discovered_at, existing?.discovered_at ?? new Date().toISOString(), 'discovered_at') ?? new Date().toISOString(),
     last_enriched_at: parseTimestamp(body.last_enriched_at, existing?.last_enriched_at ?? null, 'last_enriched_at'),
+    viewed_at: parseTimestamp(body.viewed_at, existing?.viewed_at ?? null, 'viewed_at'),
     created_at: existing?.created_at ?? '',
     updated_at: existing?.updated_at ?? '',
   }
+  if (body.mark_enriched === true) lead.last_enriched_at = new Date().toISOString()
+  if (body.mark_viewed === true) lead.viewed_at = new Date().toISOString()
+  if (body.mark_viewed === false) lead.viewed_at = null
   lead.dedupe_key = dedupeKey(lead)
   return lead
 }
@@ -132,8 +138,6 @@ async function updateLead(existing: LeadRow, body: Record<string, unknown>, opti
   if (has(body, 'custom_fields')) {
     lead.custom_fields = { ...existing.custom_fields, ...lead.custom_fields }
   }
-  if (body.mark_enriched === true) lead.last_enriched_at = new Date().toISOString()
-
   const rows = await sql`
     update leads set
       name = ${lead.name}, email = ${lead.email}, phone = ${lead.phone}, title = ${lead.title},
@@ -142,7 +146,8 @@ async function updateLead(existing: LeadRow, body: Record<string, unknown>, opti
       source_url = ${lead.source_url}, notes = ${lead.notes}, tags = ${JSON.stringify(lead.tags)}::jsonb,
       custom_fields = ${JSON.stringify(lead.custom_fields)}::jsonb, score = ${lead.score},
       status = ${lead.status}, priority = ${lead.priority}, dedupe_key = ${lead.dedupe_key},
-      discovered_at = ${lead.discovered_at}, last_enriched_at = ${lead.last_enriched_at}, updated_at = now()
+      discovered_at = ${lead.discovered_at}, last_enriched_at = ${lead.last_enriched_at},
+      viewed_at = ${lead.viewed_at}, updated_at = now()
     where id = ${existing.id}
     returning *
   `
@@ -177,13 +182,13 @@ export async function saveLead(body: Record<string, unknown>, options: SaveOptio
     insert into leads (
       name, email, phone, title, company_name, company_domain, website_url, linkedin_url,
       source, source_url, notes, tags, custom_fields, score, status, priority, dedupe_key,
-      discovered_at, last_enriched_at
+      discovered_at, last_enriched_at, viewed_at
     ) values (
       ${candidate.name}, ${candidate.email}, ${candidate.phone}, ${candidate.title},
       ${candidate.company_name}, ${candidate.company_domain}, ${candidate.website_url}, ${candidate.linkedin_url},
       ${candidate.source}, ${candidate.source_url}, ${candidate.notes}, ${JSON.stringify(candidate.tags)}::jsonb,
       ${JSON.stringify(candidate.custom_fields)}::jsonb, ${candidate.score}, ${candidate.status},
-      ${candidate.priority}, ${candidate.dedupe_key}, ${candidate.discovered_at}, ${candidate.last_enriched_at}
+      ${candidate.priority}, ${candidate.dedupe_key}, ${candidate.discovered_at}, ${candidate.last_enriched_at}, ${candidate.viewed_at}
     ) returning *
   `
   return { lead: publicLead(rows[0] as Record<string, unknown>), action: 'created' as const }

@@ -83,6 +83,7 @@ export type Lead = {
   contact_id: string | null
   discovered_at: string
   last_enriched_at: string | null
+  viewed_at: string | null
   created_at: string
   updated_at: string
 }
@@ -95,6 +96,7 @@ export type LeadSummary = {
   contacted: number
   disqualified: number
   converted: number
+  unviewed: number
 }
 
 export type DashboardActivityKind = 'contact' | 'company' | 'deal' | 'task'

@@ -50,7 +50,7 @@ export const contacts = {
 }
 
 export const leads = {
-  list: (filters: { q?: string; status?: LeadStatus; priority?: LeadPriority; source?: string; tag?: string; limit?: number; offset?: number; sort?: 'created' | 'updated' | 'score' } = {}) => {
+  list: (filters: { q?: string; status?: LeadStatus; priority?: LeadPriority; source?: string; tag?: string; viewed?: boolean; limit?: number; offset?: number; sort?: 'created' | 'updated' | 'score' } = {}) => {
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(filters)) {
       if (value !== undefined && value !== '') params.set(key, String(value))
@@ -60,7 +60,7 @@ export const leads = {
   },
   get: (id: string) => request<{ lead: Lead }>(`/v1/leads/${id}`),
   create: (data: Partial<Lead> & { name: string }) => request<{ lead: Lead; action: 'created' | 'updated' }>('/v1/leads', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id: string, data: Partial<Lead> & { append_notes?: boolean; mark_enriched?: boolean }) =>
+  update: (id: string, data: Partial<Lead> & { append_notes?: boolean; mark_enriched?: boolean; mark_viewed?: boolean }) =>
     request<{ lead: Lead }>(`/v1/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (id: string) => request<void>(`/v1/leads/${id}`, { method: 'DELETE' }),
   convert: (id: string, options: { create_company?: boolean; is_active_client?: boolean; create_deal?: boolean; deal_name?: string; deal_value_cents?: number; deal_stage?: DealStage } = {}) =>

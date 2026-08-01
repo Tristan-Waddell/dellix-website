@@ -21,6 +21,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
     if (body.append_notes !== undefined && typeof body.append_notes !== 'boolean') throw new HttpError(400, '"append_notes" must be a boolean.')
     if (body.merge_tags !== undefined && typeof body.merge_tags !== 'boolean') throw new HttpError(400, '"merge_tags" must be a boolean.')
     if (body.mark_enriched !== undefined && typeof body.mark_enriched !== 'boolean') throw new HttpError(400, '"mark_enriched" must be a boolean.')
+    if (body.mark_viewed !== undefined && typeof body.mark_viewed !== 'boolean') throw new HttpError(400, '"mark_viewed" must be a boolean.')
     const lead = await patchLead(existing, body)
     res.status(200).json({ lead })
     return

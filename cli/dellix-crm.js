@@ -129,6 +129,7 @@ leadCmd
   .option('--priority <priority>', 'low|normal|high')
   .option('--source <source>', 'exact source name')
   .option('--tag <tag>', 'required tag')
+  .option('--viewed <viewed>', 'true for reviewed, false for new/unviewed')
   .option('--sort <sort>', 'created|updated|score', 'created')
   .option('--limit <limit>', '1-100', '50')
   .option('--offset <offset>', 'pagination offset', '0')
