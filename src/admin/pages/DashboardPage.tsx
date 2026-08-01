@@ -334,7 +334,7 @@ function TaskPanel({
   }
 
   return (
-    <section className="overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75">
+    <section className="-mx-4 overflow-hidden border-y border-steel-700 bg-steel-900/75 sm:mx-0 sm:rounded-[var(--radius-card)] sm:border">
       <div className="flex items-center justify-between border-b border-steel-700 px-4 py-4 sm:px-5">
         <div>
           <h2 className="font-semibold tracking-tight text-ink">To-do</h2>
@@ -347,7 +347,7 @@ function TaskPanel({
         </span>
       </div>
 
-      <form onSubmit={handleCreate} className="border-b border-steel-700/80 bg-charcoal-850/50 p-3 sm:p-4">
+      <form onSubmit={handleCreate} className="border-b border-steel-700/80 bg-charcoal-850/50 p-4">
         <div className="flex gap-2">
           <label htmlFor="new-task" className="sr-only">New task</label>
           <input
@@ -477,7 +477,7 @@ function TaskRow({
 
   if (editing) {
     return (
-      <li className="bg-steel-800/25 px-3 py-4 sm:px-5">
+      <li className="bg-steel-800/25 px-4 py-4 sm:px-5">
         <form onSubmit={handleSave} className="flex flex-col gap-3">
           <label>
             <span className="sr-only">Task title</span>
@@ -518,7 +518,17 @@ function TaskRow({
 
           {error && <p className="text-xs text-red-400">{error}</p>}
 
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end">
+          <div className="grid grid-cols-[2.75rem_1fr_1fr] gap-2 sm:flex sm:items-center sm:justify-end">
+            <button
+              type="button"
+              onClick={() => void onDelete(task)}
+              disabled={saving}
+              aria-label={`Delete ${task.title}`}
+              className="grid h-11 w-11 touch-manipulation place-items-center rounded-lg border border-red-500/20 text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50 sm:mr-auto sm:flex sm:h-auto sm:w-auto sm:gap-1.5 sm:border-transparent sm:px-3 sm:py-2 sm:text-xs"
+            >
+              <Icon name="trash" className="text-sm" />
+              <span className="hidden sm:inline">Delete</span>
+            </button>
             <button
               type="button"
               onClick={cancelEditing}
@@ -541,7 +551,7 @@ function TaskRow({
   }
 
   return (
-    <li className="group flex items-start gap-2 px-3 py-3.5 transition-colors hover:bg-steel-800/35 sm:gap-3 sm:px-5">
+    <li className="group flex items-start gap-2 px-4 py-3.5 transition-colors hover:bg-steel-800/35 sm:gap-3 sm:px-5">
       <button
         type="button"
         onClick={() => void onToggle(task)}
@@ -589,7 +599,7 @@ function TaskRow({
           type="button"
           onClick={() => void onDelete(task)}
           aria-label={`Delete ${task.title}`}
-          className="grid h-9 w-9 touch-manipulation place-items-center rounded-lg text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-400 sm:h-7 sm:w-7 sm:rounded-md sm:text-steel-500"
+          className="hidden h-7 w-7 place-items-center rounded-md text-steel-500 transition-colors hover:bg-red-500/10 hover:text-red-400 sm:grid"
         >
           <Icon name="trash" className="text-sm" />
         </button>
