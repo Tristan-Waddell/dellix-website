@@ -184,9 +184,7 @@ export function DashboardPage() {
 
       {data ? (
         <>
-          <TwelveMonthRevenueCard data={financialData} error={financialError} />
-
-          <SummaryCards data={data} />
+          <SummaryCards data={data} financialData={financialData} financialError={financialError} />
 
           <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
             <TaskPanel
@@ -209,55 +207,18 @@ export function DashboardPage() {
   )
 }
 
-function TwelveMonthRevenueCard({ data, error }: { data: FinancialsData | null; error: string }) {
-  if (error && !data) {
-    return (
-      <section className="rounded-[var(--radius-card)] border border-red-500/25 bg-red-500/10 px-5 py-4 sm:px-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-ink">Gross revenue unavailable</p>
-            <p className="mt-0.5 truncate text-xs text-red-300">{error}</p>
-          </div>
-          <Link to="/financials" className="shrink-0 text-xs font-medium text-lime-500">View details</Link>
-        </div>
-      </section>
-    )
-  }
-
-  if (!data) {
-    return <div className="h-32 animate-pulse rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75" />
-  }
-
-  const grossRevenue = data.monthly_revenue.reduce((total, month) => total + month.gross_cents, 0)
-
-  return (
-    <Link
-      to="/financials"
-      className="group flex min-w-0 flex-col gap-5 overflow-hidden rounded-[var(--radius-card)] border border-lime-500/30 bg-gradient-to-br from-lime-500/[0.13] via-steel-900/90 to-steel-900/75 p-5 transition-colors hover:border-lime-500/55 sm:flex-row sm:items-center sm:justify-between sm:p-6"
-    >
-      <div className="flex min-w-0 items-center gap-4">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-lime-500/25 bg-lime-500/10 text-xl text-lime-500">
-          <Icon name="dollar" />
-        </span>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-lime-500">Gross revenue</p>
-          <p className="mt-1 text-sm text-ink-muted">Stripe collected volume over the past 12 months</p>
-        </div>
-      </div>
-      <div className="min-w-0 sm:text-right">
-        <p className="truncate text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          {formatMoney(grossRevenue)}
-        </p>
-        <div className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-lime-500">
-          View financials
-          <Icon name="arrow" className="transition-transform group-hover:translate-x-0.5" />
-        </div>
-      </div>
-    </Link>
-  )
-}
-
-function SummaryCards({ data }: { data: DashboardData }) {
+function SummaryCards({
+  data,
+  financialData,
+  financialError,
+}: {
+  data: DashboardData
+  financialData: FinancialsData | null
+  financialError: string
+}) {
+  const grossRevenue = financialData
+    ? financialData.monthly_revenue.reduce((total, month) => total + month.gross_cents, 0)
+    : null
   const cards: Array<{
     label: string
     value: string
@@ -266,6 +227,14 @@ function SummaryCards({ data }: { data: DashboardData }) {
     to: string
     accent?: boolean
   }> = [
+    {
+      label: 'Gross revenue',
+      value: grossRevenue === null ? '—' : formatMoney(grossRevenue),
+      note: financialError ? 'Stripe unavailable' : grossRevenue === null ? 'Loading Stripe…' : 'Past 12 months',
+      icon: 'chart',
+      to: '/financials',
+      accent: true,
+    },
     {
       label: 'Open pipeline',
       value: formatMoney(data.summary.open_pipeline_cents),
@@ -298,12 +267,12 @@ function SummaryCards({ data }: { data: DashboardData }) {
   ]
 
   return (
-    <section aria-label="CRM summary" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <section aria-label="CRM summary" className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
       {cards.map((card) => (
         <Link
           key={card.label}
           to={card.to}
-          className={`group rounded-[var(--radius-card)] border p-4 transition-all hover:-translate-y-0.5 sm:p-5 ${
+          className={`group min-w-0 rounded-[var(--radius-card)] border p-3.5 transition-all hover:-translate-y-0.5 xl:p-4 ${
             card.accent
               ? 'border-lime-500/20 bg-lime-500/[0.06] hover:border-lime-500/35'
               : 'border-steel-700 bg-steel-900/75 hover:border-steel-600'
@@ -313,7 +282,7 @@ function SummaryCards({ data }: { data: DashboardData }) {
             <p className="text-xs font-medium text-ink-muted">{card.label}</p>
             <Icon name={card.icon} className={card.accent ? 'text-lime-500' : 'text-steel-400'} />
           </div>
-          <p className="mt-3 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{card.value}</p>
+          <p className="mt-3 truncate text-xl font-semibold tracking-tight text-ink xl:text-2xl">{card.value}</p>
           <p className="mt-1 truncate text-xs text-ink-muted">{card.note}</p>
         </Link>
       ))}
@@ -768,8 +737,8 @@ function ActivityPanel({ list }: { list: DashboardActivity[] }) {
 function DashboardSkeleton() {
   return (
     <div aria-label="Loading dashboard" className="animate-pulse">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {Array.from({ length: 4 }, (_, index) => (
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+        {Array.from({ length: 5 }, (_, index) => (
           <div key={index} className="h-32 rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75" />
         ))}
       </div>
