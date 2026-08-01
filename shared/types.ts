@@ -159,6 +159,11 @@ export type FinancialsData = {
     gross_cents: number
     net_cents: number
   }>
+  daily_revenue: Array<{
+    date: string
+    gross_cents: number
+    net_cents: number
+  }>
   recent_activity: FinancialActivity[]
   client_revenue: Array<{
     contact_id: string

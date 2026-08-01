@@ -47,19 +47,31 @@ export function FinancialsPage() {
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Financials</h1>
           <p className="mt-1 text-sm text-ink-muted">Revenue, proceeds, balances, and payouts in one place.</p>
         </div>
-        <div className="grid grid-cols-3 rounded-xl border border-steel-700 bg-steel-900 p-1" aria-label="Financial period">
-          {(Object.keys(periodLabels) as FinancialPeriod[]).map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setPeriod(value)}
-              className={`rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                period === value ? 'bg-lime-500 text-charcoal-950' : 'text-ink-muted hover:text-ink'
-              }`}
-            >
-              {periodLabels[value]}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 sm:items-end">
+          <a
+            href="https://dashboard.stripe.com/invoices/create"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-lime-500 px-4 py-2 text-sm font-semibold text-charcoal-950 transition-colors hover:bg-lime-400"
+          >
+            <Icon name="plus" />
+            Create Invoice
+            <Icon name="arrow-up-right" className="text-xs" />
+          </a>
+          <div className="grid grid-cols-3 rounded-xl border border-steel-700 bg-steel-900 p-1" aria-label="Financial period">
+            {(Object.keys(periodLabels) as FinancialPeriod[]).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPeriod(value)}
+                className={`rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                  period === value ? 'bg-lime-500 text-charcoal-950' : 'text-ink-muted hover:text-ink'
+                }`}
+              >
+                {periodLabels[value]}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -79,6 +91,7 @@ export function FinancialsPage() {
 }
 
 function FinancialContent({ data, loading }: { data: FinancialsData; loading: boolean }) {
+  const daily = data.period === 'month'
   const metricCards: Array<{ label: string; value: string; note: string; icon: IconName; accent?: boolean }> = [
     {
       label: 'Gross collected',
@@ -161,11 +174,15 @@ function FinancialContent({ data, loading }: { data: FinancialsData; loading: bo
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
             <h2 className="font-semibold tracking-tight text-ink">Revenue trend</h2>
-            <p className="mt-0.5 text-xs text-ink-muted">Rolling 12 months · gross and net</p>
+            <p className="mt-0.5 text-xs text-ink-muted">{daily ? 'Daily this month' : 'Rolling 12 months'} · gross and net</p>
           </div>
           <p className="font-mono text-[10px] uppercase text-steel-400">{data.currency}</p>
         </div>
-        <RevenueChart data={data.monthly_revenue} currency={data.currency} />
+        <RevenueChart
+          data={daily ? data.daily_revenue : data.monthly_revenue}
+          currency={data.currency}
+          granularity={daily ? 'day' : 'month'}
+        />
       </section>
 
       <div className="grid min-w-0 items-start gap-5 lg:grid-cols-2">

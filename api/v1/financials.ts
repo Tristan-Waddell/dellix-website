@@ -163,6 +163,31 @@ function monthlyBuckets(transactions: StripeBalanceTransaction[]) {
   return months
 }
 
+function dailyBuckets(transactions: StripeBalanceTransaction[]) {
+  const start = utcStartOfMonth()
+  const now = new Date()
+  const dayCount = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - start.getTime()) / 86_400_000) + 1
+  const days = Array.from({ length: dayCount }, (_, index) => {
+    const date = new Date(start)
+    date.setUTCDate(date.getUTCDate() + index)
+    return {
+      date: date.toISOString().slice(0, 10),
+      gross_cents: 0,
+      net_cents: 0,
+    }
+  })
+  const byDay = new Map(days.map((day) => [day.date, day]))
+
+  for (const transaction of transactions) {
+    const bucket = byDay.get(new Date(transaction.created * 1000).toISOString().slice(0, 10))
+    if (!bucket) continue
+    if (transaction.reporting_category === 'charge' && transaction.amount > 0) bucket.gross_cents += transaction.amount
+    if (REPORTING_ACTIVITY.has(transaction.reporting_category)) bucket.net_cents += transaction.net
+  }
+
+  return days
+}
+
 function monthlyAmount(item: StripeSubscription['items']['data'][number]) {
   const recurring = item.price.recurring
   if (!recurring) return 0
@@ -330,6 +355,7 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
       mrr_cents: mrrCents,
     },
     monthly_revenue: monthlyBuckets(allTransactions),
+    daily_revenue: dailyBuckets(allTransactions),
     recent_activity: recentActivity,
     client_revenue: [...clientTotals.values()].sort((a, b) => b.net_cents - a.net_cents),
     warnings,

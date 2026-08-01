@@ -2,9 +2,10 @@ import { useId } from 'react'
 import type { FinancialsData } from '../../../shared/types.ts'
 
 type Props = {
-  data: FinancialsData['monthly_revenue']
+  data: FinancialsData['monthly_revenue'] | FinancialsData['daily_revenue']
   currency: string
   compact?: boolean
+  granularity?: 'month' | 'day'
 }
 
 function compactMoney(cents: number, currency: string) {
@@ -16,7 +17,7 @@ function compactMoney(cents: number, currency: string) {
   }).format(cents / 100)
 }
 
-export function RevenueChart({ data, currency, compact = false }: Props) {
+export function RevenueChart({ data, currency, compact = false, granularity = 'month' }: Props) {
   const gradientId = useId().replaceAll(':', '')
   const width = 760
   const height = compact ? 210 : 280
@@ -43,7 +44,12 @@ export function RevenueChart({ data, currency, compact = false }: Props) {
         <span className="flex items-center gap-1.5"><span className="h-0.5 w-4 rounded bg-steel-400" />Net</span>
       </div>
       <div className="relative w-full overflow-hidden">
-        <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Gross and net revenue over the last twelve months" className="h-auto w-full">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          aria-label={granularity === 'day' ? 'Daily gross and net revenue for this month' : 'Gross and net revenue over the last twelve months'}
+          className="h-auto w-full"
+        >
           <defs>
             <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="var(--color-lime-500)" stopOpacity="0.18" />
@@ -60,9 +66,15 @@ export function RevenueChart({ data, currency, compact = false }: Props) {
             </g>
           ))}
 
-          {data.map((item, index) => (
+          {data.map((item, index) => {
+            const value = 'date' in item ? item.date : `${item.month}-01`
+            const date = new Date(`${value}T00:00:00Z`)
+            const showLabel = granularity === 'day'
+              ? index === 0 || index === data.length - 1 || date.getUTCDate() % 5 === 0
+              : index % 2 === 0 || index === data.length - 1
+            return (
             <text
-              key={item.month}
+              key={value}
               x={x(index)}
               y={height - 10}
               textAnchor="middle"
@@ -70,19 +82,24 @@ export function RevenueChart({ data, currency, compact = false }: Props) {
               fontSize="10"
               fontFamily="var(--font-mono)"
             >
-              {index % 2 === 0 || index === data.length - 1
-                ? new Date(`${item.month}-01T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+              {showLabel
+                ? date.toLocaleDateString('en-US', granularity === 'day'
+                  ? { day: 'numeric', timeZone: 'UTC' }
+                  : { month: 'short', timeZone: 'UTC' })
                 : ''}
             </text>
-          ))}
+            )
+          })}
 
           {hasRevenue && <polygon points={areaPoints} fill={`url(#${gradientId})`} />}
           <polyline points={grossPoints} fill="none" stroke="var(--color-lime-500)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           <polyline points={netPoints} fill="none" stroke="var(--color-steel-400)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 5" />
 
-          {data.map((item, index) => (
-            <circle key={item.month} cx={x(index)} cy={y(item.gross_cents)} r="3" fill="var(--color-charcoal-900)" stroke="var(--color-lime-500)" strokeWidth="2" />
-          ))}
+          {data.map((item, index) => {
+            const key = 'date' in item ? item.date : item.month
+            if (granularity === 'day' && item.gross_cents === 0) return null
+            return <circle key={key} cx={x(index)} cy={y(item.gross_cents)} r="3" fill="var(--color-charcoal-900)" stroke="var(--color-lime-500)" strokeWidth="2" />
+          })}
         </svg>
         {!hasRevenue && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
