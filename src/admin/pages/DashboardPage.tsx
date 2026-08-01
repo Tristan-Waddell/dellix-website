@@ -164,7 +164,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-7">
+    <div className="flex min-w-0 flex-col gap-6 sm:gap-7">
       <header className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-lime-500">Command center</p>
@@ -177,7 +177,7 @@ export function DashboardPage() {
         <>
           <SummaryCards data={data} />
 
-          <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
+          <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
             <TaskPanel
               list={data.tasks}
               onCreated={prependTask}
@@ -185,7 +185,7 @@ export function DashboardPage() {
               onRemoved={removeTask}
               onRefresh={load}
             />
-            <div className="grid gap-5">
+            <div className="grid min-w-0 gap-5">
               <PipelinePanel data={data} />
               <ActivityPanel list={data.recent_activity} />
             </div>
@@ -628,7 +628,7 @@ function PipelinePanel({ data }: { data: DashboardData }) {
   const maxValue = Math.max(...stages.map((item) => item.value_cents), 1)
 
   return (
-    <section className="rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
+    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-semibold tracking-tight text-ink">Pipeline</h2>
@@ -665,7 +665,7 @@ function ActivityPanel({ list }: { list: DashboardActivity[] }) {
   }
 
   return (
-    <section className="rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
+    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
       <div>
         <h2 className="font-semibold tracking-tight text-ink">Recent activity</h2>
         <p className="mt-0.5 text-xs text-ink-muted">Latest additions across your CRM</p>

@@ -24,11 +24,13 @@ export default withRoute(async (req: VercelRequest, res: VercelResponse) => {
     const title = body.title !== undefined ? optionalString(body.title) : existing.title
     const notes = body.notes !== undefined ? optionalString(body.notes) : existing.notes
     const companyId = body.company_id !== undefined ? optionalString(body.company_id) : existing.company_id
+    const isActiveClient = body.is_active_client === undefined ? existing.is_active_client : body.is_active_client
+    if (typeof isActiveClient !== 'boolean') throw new HttpError(400, '"is_active_client" must be a boolean.')
 
     const rows = await sql`
       update contacts
       set name = ${name}, email = ${email}, phone = ${phone}, title = ${title},
-          notes = ${notes}, company_id = ${companyId}, updated_at = now()
+          notes = ${notes}, company_id = ${companyId}, is_active_client = ${isActiveClient}, updated_at = now()
       where id = ${id}
       returning *
     `

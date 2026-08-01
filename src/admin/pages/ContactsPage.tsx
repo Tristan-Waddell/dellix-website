@@ -9,22 +9,22 @@ export function ContactsPage() {
   const [list, setList] = useState<Contact[] | null>(null)
   const [companyList, setCompanyList] = useState<Company[]>([])
   const [query, setQuery] = useState('')
+  const [activeOnly, setActiveOnly] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
 
-  function reload(q?: string) {
-    contacts.list(q).then((res) => setList(res.contacts))
+  function reload(q?: string, onlyActive = activeOnly) {
+    contacts.list(q, onlyActive).then((res) => setList(res.contacts))
   }
 
   useEffect(() => {
-    reload()
     companies.list().then((res) => setCompanyList(res.companies))
   }, [])
 
   useEffect(() => {
-    const timeout = setTimeout(() => reload(query), 250)
+    const timeout = setTimeout(() => reload(query, activeOnly), 250)
     return () => clearTimeout(timeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query])
+  }, [query, activeOnly])
 
   function companyName(id: string | null) {
     return companyList.find((c) => c.id === id)?.name ?? null
@@ -55,6 +55,28 @@ export function ContactsPage() {
         />
       </div>
 
+      <div className="flex items-center gap-2" aria-label="Contact filters">
+        <button
+          type="button"
+          onClick={() => setActiveOnly(false)}
+          className={`rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
+            !activeOnly ? 'bg-lime-500 text-charcoal-950' : 'border border-steel-700 text-ink-muted hover:text-ink'
+          }`}
+        >
+          All contacts
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveOnly(true)}
+          className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition-colors ${
+            activeOnly ? 'bg-lime-500 text-charcoal-950' : 'border border-steel-700 text-ink-muted hover:text-ink'
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${activeOnly ? 'bg-charcoal-950' : 'bg-lime-500'}`} aria-hidden="true" />
+          Active clients
+        </button>
+      </div>
+
       <ul className="flex flex-col gap-2">
         {list?.length === 0 && <p className="py-8 text-center text-sm text-ink-muted">No contacts yet.</p>}
         {list?.map((c) => (
@@ -64,7 +86,15 @@ export function ContactsPage() {
               className="flex items-center justify-between gap-3 rounded-lg border border-steel-700 bg-steel-900 px-4 py-3.5 transition-colors hover:border-steel-600"
             >
               <div className="min-w-0">
-                <p className="truncate font-medium text-ink">{c.name}</p>
+                <div className="flex min-w-0 items-center gap-2">
+                  <p className="truncate font-medium text-ink">{c.name}</p>
+                  {c.is_active_client && (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded bg-lime-500/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-lime-500">
+                      <span className="h-1.5 w-1.5 rounded-full bg-lime-500" aria-hidden="true" />
+                      Active
+                    </span>
+                  )}
+                </div>
                 <p className="truncate text-sm text-ink-muted">
                   {[c.email, companyName(c.company_id)].filter(Boolean).join(' · ') || '—'}
                 </p>
@@ -79,7 +109,7 @@ export function ContactsPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         companyList={companyList}
-        onCreated={() => reload(query)}
+        onCreated={() => reload(query, activeOnly)}
       />
     </div>
   )
@@ -101,11 +131,12 @@ function AddContactModal({
   const [phone, setPhone] = useState('')
   const [title, setTitle] = useState('')
   const [companyId, setCompanyId] = useState('')
+  const [isActiveClient, setIsActiveClient] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   function reset() {
-    setName(''); setEmail(''); setPhone(''); setTitle(''); setCompanyId(''); setError('')
+    setName(''); setEmail(''); setPhone(''); setTitle(''); setCompanyId(''); setIsActiveClient(false); setError('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -113,7 +144,7 @@ function AddContactModal({
     setSubmitting(true)
     setError('')
     try {
-      await contacts.create({ name, email, phone, title, company_id: companyId || null })
+      await contacts.create({ name, email, phone, title, company_id: companyId || null, is_active_client: isActiveClient })
       reset()
       onClose()
       onCreated()
@@ -147,6 +178,23 @@ function AddContactModal({
             ))}
           </select>
         </Field>
+
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-steel-700 bg-charcoal-850 px-3.5 py-3">
+          <span className="flex items-center gap-2 text-sm font-medium text-ink">
+            <span className="h-2 w-2 rounded-full bg-lime-500" aria-hidden="true" />
+            Active client
+          </span>
+          <span className="relative shrink-0">
+            <input
+              type="checkbox"
+              checked={isActiveClient}
+              onChange={(e) => setIsActiveClient(e.target.checked)}
+              className="peer sr-only"
+            />
+            <span className="block h-7 w-12 rounded-full bg-steel-600 transition-colors peer-checked:bg-lime-500" />
+            <span className="absolute left-1 top-1 h-5 w-5 rounded-full bg-ink transition-transform peer-checked:translate-x-5 peer-checked:bg-charcoal-950" />
+          </span>
+        </label>
 
         {error && <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{error}</p>}
 

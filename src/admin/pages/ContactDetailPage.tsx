@@ -38,6 +38,7 @@ export function ContactDetailPage() {
         title: contact.title,
         notes: contact.notes,
         company_id: contact.company_id,
+        is_active_client: contact.is_active_client,
       })
       setContact(res.contact)
       setStatus('saved')
@@ -62,6 +63,26 @@ export function ContactDetailPage() {
       </Link>
 
       <form onSubmit={handleSave} className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-steel-700 bg-steel-900 p-5">
+        <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-steel-700 bg-charcoal-850 px-4 py-3.5">
+          <span>
+            <span className="flex items-center gap-2 text-sm font-medium text-ink">
+              <span className="h-2 w-2 rounded-full bg-lime-500" aria-hidden="true" />
+              Active client
+            </span>
+            <span className="mt-1 block text-xs text-ink-muted">Show this contact in the active clients view.</span>
+          </span>
+          <span className="relative shrink-0">
+            <input
+              type="checkbox"
+              checked={contact.is_active_client}
+              onChange={(e) => update('is_active_client', e.target.checked)}
+              className="peer sr-only"
+            />
+            <span className="block h-7 w-12 rounded-full bg-steel-600 transition-colors peer-checked:bg-lime-500" />
+            <span className="absolute left-1 top-1 h-5 w-5 rounded-full bg-ink shadow-sm transition-transform peer-checked:translate-x-5 peer-checked:bg-charcoal-950" />
+          </span>
+        </label>
+
         <Field label="Name" htmlFor="d-name">
           <input id="d-name" required value={contact.name} onChange={(e) => update('name', e.target.value)} className={inputClass} />
         </Field>

@@ -36,7 +36,13 @@ export const auth = {
 }
 
 export const contacts = {
-  list: (q?: string) => request<{ contacts: Contact[] }>(`/v1/contacts${q ? `?q=${encodeURIComponent(q)}` : ''}`),
+  list: (q?: string, activeOnly = false) => {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (activeOnly) params.set('active', 'true')
+    const query = params.toString()
+    return request<{ contacts: Contact[] }>(`/v1/contacts${query ? `?${query}` : ''}`)
+  },
   get: (id: string) => request<{ contact: Contact }>(`/v1/contacts/${id}`),
   create: (data: Partial<Contact>) => request<{ contact: Contact }>('/v1/contacts', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Partial<Contact>) => request<{ contact: Contact }>(`/v1/contacts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),

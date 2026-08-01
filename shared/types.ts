@@ -24,6 +24,7 @@ export type Contact = {
   phone: string | null
   title: string | null
   notes: string | null
+  is_active_client: boolean
   created_at: string
   updated_at: string
 }

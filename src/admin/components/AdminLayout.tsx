@@ -26,7 +26,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-charcoal-900 sm:flex-row">
+    <div className="flex min-h-dvh min-w-0 flex-col bg-charcoal-900 sm:flex-row">
       {/* Desktop rail */}
       <aside className="hidden w-56 shrink-0 flex-col border-r border-steel-700/80 bg-charcoal-950 p-4 sm:flex">
         <Wordmark />
@@ -62,8 +62,8 @@ export function AdminLayout() {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-24 sm:pb-0">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
+      <main className="min-w-0 flex-1 overflow-y-auto pb-24 sm:pb-0">
+        <div className="mx-auto min-w-0 w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           <Outlet />
         </div>
       </main>

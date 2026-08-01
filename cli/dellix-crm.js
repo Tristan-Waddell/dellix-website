@@ -84,6 +84,7 @@ function entityCommands(name, plural) {
     .option('--stage <stage>', 'stage: lead|contacted|proposal|won|lost (deals)')
     .option('--value <dollars>', 'deal value in dollars (deals)')
     .option('--notes <notes>', 'notes')
+    .option('--active-client', 'mark as an active client (contacts)')
     .action(async (opts) => {
       const body = { name: opts.name, notes: opts.notes }
       if (opts.email) body.email = opts.email
@@ -94,6 +95,7 @@ function entityCommands(name, plural) {
       if (opts.contactId) body.contact_id = opts.contactId
       if (opts.stage) body.stage = opts.stage
       if (opts.value) body.value_cents = Math.round(Number(opts.value) * 100)
+      if (opts.activeClient) body.is_active_client = true
 
       const data = await request(`/${plural}`, { method: 'POST', body })
       console.log(JSON.stringify(data[name], null, 2))
