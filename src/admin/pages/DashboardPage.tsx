@@ -191,7 +191,7 @@ export function DashboardPage() {
         <>
           <SummaryCards data={data} financialData={financialData} financialError={financialError} />
 
-          <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
+          <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
             <TaskPanel
               list={data.tasks}
               onCreated={prependTask}
@@ -199,7 +199,7 @@ export function DashboardPage() {
               onRemoved={removeTask}
               onRefresh={load}
             />
-            <div className="grid min-w-0 gap-5">
+            <div className="grid min-w-0 gap-5 lg:h-full lg:grid-rows-[auto_minmax(0,1fr)]">
               <PipelinePanel data={data} />
               <ActivityPanel list={data.recent_activity} />
             </div>
@@ -367,7 +367,7 @@ function TaskPanel({
   }
 
   return (
-    <section className="-mx-4 overflow-hidden border-y border-steel-700 bg-steel-900/75 sm:mx-0 sm:rounded-[var(--radius-card)] sm:border">
+    <section className="-mx-4 overflow-hidden border-y border-steel-700 bg-steel-900/75 sm:mx-0 sm:rounded-[var(--radius-card)] sm:border lg:h-full">
       <div className="flex items-center justify-between border-b border-steel-700 px-4 py-4 sm:px-5">
         <div>
           <h2 className="font-semibold tracking-tight text-ink">To-do</h2>
@@ -708,7 +708,7 @@ function ActivityPanel({ list }: { list: DashboardActivity[] }) {
   }
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5">
+    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75 p-4 sm:p-5 lg:h-full">
       <div>
         <h2 className="font-semibold tracking-tight text-ink">Recent activity</h2>
         <p className="mt-0.5 text-xs text-ink-muted">Latest additions across your CRM</p>
