@@ -106,16 +106,18 @@ export function DealsPage() {
           onDragCancel={() => setActiveDeal(null)}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {DEAL_STAGES.map((stage) => (
-              <StageColumn
-                key={stage}
-                stage={stage}
-                dealsInStage={columns[stage]}
-                isDragging={activeDeal !== null}
-                onDelete={handleDelete}
-              />
-            ))}
+          <div className="lg:overflow-x-auto lg:pb-2">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[70rem] lg:grid-cols-5 lg:gap-4">
+              {DEAL_STAGES.map((stage) => (
+                <StageColumn
+                  key={stage}
+                  stage={stage}
+                  dealsInStage={columns[stage]}
+                  isDragging={activeDeal !== null}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
           </div>
         </DndContext>
       )}
@@ -148,7 +150,7 @@ function StageColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col gap-3 rounded-[var(--radius-card)] border border-t-2 bg-steel-900/60 p-3 transition-colors ${stageAccent[stage]} ${
+      className={`flex flex-col gap-3 rounded-[var(--radius-card)] border border-t-2 bg-steel-900/60 p-3 transition-colors lg:p-4 ${stageAccent[stage]} ${
         stage === 'lost' ? 'col-span-2 sm:col-span-3 lg:col-span-1' : ''
       } ${isOver ? 'border-lime-500/60 bg-steel-900' : 'border-steel-700'}`}
     >
@@ -184,7 +186,7 @@ function DealCard({ deal, onDelete }: { deal: Deal; onDelete: (deal: Deal) => vo
       style={style}
       {...listeners}
       {...attributes}
-      className={`group relative cursor-grab rounded-lg border border-steel-700 bg-steel-900 px-3.5 py-3 active:cursor-grabbing ${
+      className={`group relative cursor-grab rounded-lg border border-steel-700 bg-steel-900 px-3.5 py-3 active:cursor-grabbing lg:px-4 lg:py-3.5 ${
         isDragging ? 'z-10 opacity-50' : ''
       }`}
     >

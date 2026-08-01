@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Icon, type IconName } from '../../components/Icon.tsx'
 import { Wordmark } from '../../components/Wordmark.tsx'
 import { auth } from '../api.ts'
@@ -20,6 +20,8 @@ function tabClass(active: boolean) {
 
 export function AdminLayout() {
   const { setAuthed } = useAdminAuth()
+  const location = useLocation()
+  const isDealFlow = location.pathname === '/deals'
 
   async function handleLogout() {
     await auth.logout().catch(() => {})
@@ -64,7 +66,9 @@ export function AdminLayout() {
       </header>
 
       <main className="min-w-0 flex-1 overflow-y-auto pb-24 sm:pb-0">
-        <div className="mx-auto min-w-0 w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
+        <div className={`mx-auto min-w-0 w-full max-w-6xl px-4 py-6 sm:px-8 sm:py-10 ${
+          isDealFlow ? 'lg:max-w-[100rem] lg:px-5 xl:px-8' : ''
+        }`}>
           <Outlet />
         </div>
       </main>
