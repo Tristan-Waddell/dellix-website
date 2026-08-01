@@ -21,13 +21,18 @@ const stageLabels: Record<DealStage, string> = {
   lost: 'Lost',
 }
 
-const stageColors: Record<DealStage, string> = {
-  lead: 'bg-steel-500',
-  contacted: 'bg-steel-400',
-  proposal: 'bg-lime-500/60',
-  won: 'bg-lime-500',
-  lost: 'bg-red-400/70',
-}
+const pipelineIntensityClasses = [
+  'bg-lime-500/20',
+  'bg-lime-500/25',
+  'bg-lime-500/30',
+  'bg-lime-500/40',
+  'bg-lime-500/50',
+  'bg-lime-500/60',
+  'bg-lime-500/70',
+  'bg-lime-500/80',
+  'bg-lime-500/90',
+  'bg-lime-500',
+]
 
 const priorityLabels: Record<TaskPriority, string> = {
   low: 'Low',
@@ -682,7 +687,7 @@ function PipelinePanel({ data }: { data: DashboardData }) {
                 <span
                   key={index}
                   className={`h-1.5 first:rounded-l-full last:rounded-r-full ${
-                    index < item.count ? stageColors[item.stage] : 'bg-steel-800'
+                    index < item.count ? pipelineIntensityClasses[index] : 'bg-lime-500/[0.07]'
                   }`}
                 />
               ))}
