@@ -50,6 +50,7 @@ export function LeadGenerationPage() {
   const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [viewingLead, setViewingLead] = useState<Lead | null>(null)
   const [busyId, setBusyId] = useState('')
 
   const load = useCallback(async (q = query, selectedStatus = status) => {
@@ -238,7 +239,8 @@ export function LeadGenerationPage() {
                 >
                   {LEAD_STATUSES.map((value) => <option key={value} value={value}>{statusLabels[value]}</option>)}
                 </select>
-                <div className="flex items-center gap-1 sm:ml-auto">
+                <div className="flex flex-wrap items-center gap-1 sm:ml-auto">
+                  <button type="button" onClick={() => setViewingLead(lead)} className="rounded-lg px-2.5 py-2 text-xs font-medium text-lime-500 hover:bg-lime-500/10">View more</button>
                   <button type="button" onClick={() => openEdit(lead)} className="rounded-lg px-2.5 py-2 text-xs text-ink-muted hover:bg-steel-800 hover:text-ink">Edit</button>
                   {lead.status === 'converted' && lead.contact_id ? (
                     <Link to={`/contacts/${lead.contact_id}`} className="rounded-lg bg-lime-500/10 px-2.5 py-2 text-xs font-medium text-lime-500">View contact</Link>
@@ -260,6 +262,15 @@ export function LeadGenerationPage() {
         </ul>
       )}
 
+      <LeadDetailModal
+        lead={viewingLead}
+        onClose={() => setViewingLead(null)}
+        onEdit={(lead) => {
+          setViewingLead(null)
+          openEdit(lead)
+        }}
+      />
+
       <LeadModal
         open={modalOpen}
         lead={editingLead}
@@ -267,6 +278,143 @@ export function LeadGenerationPage() {
         onSaved={() => void load()}
       />
     </div>
+  )
+}
+
+function safeExternalUrl(value: string | null) {
+  if (!value) return null
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null
+  } catch {
+    return null
+  }
+}
+
+function formatDetailDate(value: string | null) {
+  if (!value) return '—'
+  return new Date(value).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
+function LinkedText({ children }: { children: string }) {
+  const parts = children.split(/(https?:\/\/[^\s]+)/gi)
+  return (
+    <>
+      {parts.map((part, index) => {
+        const href = safeExternalUrl(part)
+        return href && /^https?:\/\//i.test(part) ? (
+          <a key={`${part}-${index}`} href={href} target="_blank" rel="noreferrer" className="break-all text-lime-500 underline decoration-lime-500/35 underline-offset-2 hover:text-lime-400">{part}</a>
+        ) : part
+      })}
+    </>
+  )
+}
+
+function DetailValue({ label, value, href, mono = false }: { label: string; value: string | number | null; href?: string | null; mono?: boolean }) {
+  const displayed = value === null || value === '' ? '—' : String(value)
+  return (
+    <div className="min-w-0">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-steel-500">{label}</p>
+      {href && displayed !== '—' ? (
+        <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noreferrer' : undefined} className={`mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-sm text-lime-500 hover:text-lime-400 ${mono ? 'font-mono text-xs' : ''}`}>
+          {displayed}
+          {href.startsWith('http') && <Icon name="arrow-up-right" className="shrink-0" />}
+        </a>
+      ) : (
+        <p className={`mt-0.5 break-words text-sm text-ink-muted ${mono ? 'font-mono text-xs' : ''}`}>{displayed}</p>
+      )}
+    </div>
+  )
+}
+
+function LeadDetailModal({ lead, onClose, onEdit }: { lead: Lead | null; onClose: () => void; onEdit: (lead: Lead) => void }) {
+  if (!lead) return null
+  const websiteHref = safeExternalUrl(lead.website_url)
+  const linkedinHref = safeExternalUrl(lead.linkedin_url)
+  const sourceHref = safeExternalUrl(lead.source_url)
+  const domainHref = safeExternalUrl(lead.company_domain)
+  const customEntries = Object.entries(lead.custom_fields)
+
+  return (
+    <Modal open onClose={onClose} title={lead.name} subtitle={[lead.title, lead.company_name].filter(Boolean).join(' · ') || 'Lead details'}>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded-full border px-2.5 py-1 font-mono text-[10px] ${statusClasses[lead.status]}`}>{statusLabels[lead.status]}</span>
+          <span className="rounded-full border border-steel-700 bg-steel-800 px-2.5 py-1 font-mono text-[10px] text-ink-muted">{priorityLabels[lead.priority]} priority</span>
+          <span className="rounded-full border border-lime-500/20 bg-lime-500/[0.07] px-2.5 py-1 font-mono text-[10px] text-lime-500">Score {lead.score}/100</span>
+        </div>
+
+        <section>
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink">Contact</h3>
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2">
+            <DetailValue label="Email" value={lead.email} href={lead.email ? `mailto:${lead.email}` : null} />
+            <DetailValue label="Phone" value={lead.phone} href={lead.phone ? `tel:${lead.phone}` : null} />
+            <DetailValue label="Job title" value={lead.title} />
+            <DetailValue label="Company" value={lead.company_name} />
+            <DetailValue label="Company domain" value={lead.company_domain} href={domainHref} />
+          </div>
+        </section>
+
+        <section className="border-t border-steel-700 pt-5">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink">Links & source</h3>
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2">
+            <DetailValue label="Website" value={lead.website_url} href={websiteHref} />
+            <DetailValue label="LinkedIn" value={lead.linkedin_url} href={linkedinHref} />
+            <DetailValue label="Source" value={lead.source} />
+            <DetailValue label="Source URL" value={lead.source_url} href={sourceHref} />
+          </div>
+        </section>
+
+        <section className="border-t border-steel-700 pt-5">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink">Research notes</h3>
+          <div className="whitespace-pre-wrap rounded-lg border border-steel-700 bg-charcoal-900 px-3.5 py-3 text-sm leading-relaxed text-ink-muted">
+            {lead.notes ? <LinkedText>{lead.notes}</LinkedText> : 'No research notes.'}
+          </div>
+          <div className="mt-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-steel-500">Tags</p>
+            {lead.tags.length ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">{lead.tags.map((tag) => <span key={tag} className="rounded bg-steel-800 px-2 py-1 font-mono text-[10px] text-steel-300">{tag}</span>)}</div>
+            ) : <p className="mt-1 text-sm text-ink-muted">—</p>}
+          </div>
+        </section>
+
+        <section className="border-t border-steel-700 pt-5">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink">Custom fields</h3>
+          {customEntries.length ? (
+            <div className="grid gap-3">
+              {customEntries.map(([key, value]) => {
+                const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2)
+                const href = typeof value === 'string' && /^https?:\/\//i.test(value) ? safeExternalUrl(value) : null
+                return <DetailValue key={key} label={key.replaceAll('_', ' ')} value={text} href={href} mono={typeof value !== 'string'} />
+              })}
+            </div>
+          ) : <p className="text-sm text-ink-muted">No custom fields.</p>}
+        </section>
+
+        <section className="border-t border-steel-700 pt-5">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink">Record information</h3>
+          <div className="grid grid-cols-1 gap-4 xs:grid-cols-2">
+            <DetailValue label="Discovered" value={formatDetailDate(lead.discovered_at)} />
+            <DetailValue label="Last enriched" value={formatDetailDate(lead.last_enriched_at)} />
+            <DetailValue label="Created" value={formatDetailDate(lead.created_at)} />
+            <DetailValue label="Last updated" value={formatDetailDate(lead.updated_at)} />
+            <DetailValue label="Lead ID" value={lead.id} mono />
+            {lead.contact_id && <DetailValue label="CRM contact" value="View linked contact" href={`#/contacts/${lead.contact_id}`} />}
+          </div>
+        </section>
+
+        <button type="button" onClick={() => onEdit(lead)} className="inline-flex items-center justify-center gap-2 rounded-full bg-lime-500 px-5 py-2.5 text-sm font-semibold text-charcoal-950 hover:bg-lime-400">
+          <Icon name="edit" />
+          Edit lead
+        </button>
+      </div>
+    </Modal>
   )
 }
 
