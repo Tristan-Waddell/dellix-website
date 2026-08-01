@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Icon, type IconName } from '../../components/Icon.tsx'
-import { RevenueChart } from '../components/RevenueChart.tsx'
 import { dashboard, financials, tasks, ApiError } from '../api.ts'
 import {
   DEAL_STAGES,
@@ -185,9 +184,9 @@ export function DashboardPage() {
 
       {data ? (
         <>
-          <SummaryCards data={data} />
+          <TwelveMonthRevenueCard data={financialData} error={financialError} />
 
-          <DashboardFinancials data={financialData} error={financialError} />
+          <SummaryCards data={data} />
 
           <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(19rem,0.65fr)]">
             <TaskPanel
@@ -210,13 +209,13 @@ export function DashboardPage() {
   )
 }
 
-function DashboardFinancials({ data, error }: { data: FinancialsData | null; error: string }) {
+function TwelveMonthRevenueCard({ data, error }: { data: FinancialsData | null; error: string }) {
   if (error && !data) {
     return (
-      <section className="rounded-[var(--radius-card)] border border-red-500/25 bg-red-500/10 px-5 py-4">
+      <section className="rounded-[var(--radius-card)] border border-red-500/25 bg-red-500/10 px-5 py-4 sm:px-6">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-ink">Stripe financials unavailable</p>
+            <p className="text-sm font-medium text-ink">Gross revenue unavailable</p>
             <p className="mt-0.5 truncate text-xs text-red-300">{error}</p>
           </div>
           <Link to="/financials" className="shrink-0 text-xs font-medium text-lime-500">View details</Link>
@@ -226,38 +225,35 @@ function DashboardFinancials({ data, error }: { data: FinancialsData | null; err
   }
 
   if (!data) {
-    return <div className="h-80 animate-pulse rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75" />
+    return <div className="h-32 animate-pulse rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75" />
   }
 
-  const highlights = [
-    { label: 'Gross YTD', value: formatMoney(data.metrics.gross_cents), color: 'text-lime-500' },
-    { label: 'Net YTD', value: formatMoney(data.metrics.net_cents), color: 'text-ink' },
-    { label: 'Available', value: formatMoney(data.metrics.available_cents), color: 'text-ink' },
-    { label: 'MRR', value: data.metrics.mrr_cents === null ? '—' : formatMoney(data.metrics.mrr_cents), color: 'text-ink' },
-  ]
+  const grossRevenue = data.monthly_revenue.reduce((total, month) => total + month.gross_cents, 0)
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-steel-700 bg-steel-900/75">
-      <div className="flex items-start justify-between gap-3 border-b border-steel-700 px-4 py-4 sm:px-5">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-lime-500">Revenue</p>
-          <h2 className="mt-0.5 font-semibold tracking-tight text-ink">Financial pulse</h2>
-          <p className="mt-0.5 text-xs text-ink-muted">Year to date · rolling 12-month trend</p>
-        </div>
-        <Link to="/financials" className="shrink-0 text-xs font-medium text-lime-500 hover:text-lime-400">View financials</Link>
-      </div>
-      <div className="grid min-w-0 gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_15rem]">
-        <RevenueChart data={data.monthly_revenue} currency={data.currency} compact />
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-          {highlights.map((highlight) => (
-            <div key={highlight.label} className="rounded-xl border border-steel-700 bg-charcoal-850 px-3.5 py-3">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-ink-muted">{highlight.label}</p>
-              <p className={`mt-1 truncate text-lg font-semibold tracking-tight ${highlight.color}`}>{highlight.value}</p>
-            </div>
-          ))}
+    <Link
+      to="/financials"
+      className="group flex min-w-0 flex-col gap-5 overflow-hidden rounded-[var(--radius-card)] border border-lime-500/30 bg-gradient-to-br from-lime-500/[0.13] via-steel-900/90 to-steel-900/75 p-5 transition-colors hover:border-lime-500/55 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+    >
+      <div className="flex min-w-0 items-center gap-4">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-lime-500/25 bg-lime-500/10 text-xl text-lime-500">
+          <Icon name="dollar" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-lime-500">Gross revenue</p>
+          <p className="mt-1 text-sm text-ink-muted">Stripe collected volume over the past 12 months</p>
         </div>
       </div>
-    </section>
+      <div className="min-w-0 sm:text-right">
+        <p className="truncate text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+          {formatMoney(grossRevenue)}
+        </p>
+        <div className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-lime-500">
+          View financials
+          <Icon name="arrow" className="transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </div>
+    </Link>
   )
 }
 
