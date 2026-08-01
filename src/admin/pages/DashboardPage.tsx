@@ -569,15 +569,25 @@ function TaskRow({
           {task.title}
         </p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2">
-          {task.priority !== 'normal' && (
-            <span className={`rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
-              task.priority === 'high'
-                ? 'bg-red-500/10 text-red-400'
+          <span className={`inline-flex items-center gap-1.5 rounded px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
+            task.priority === 'high'
+              ? 'bg-red-500/10 text-red-400'
+              : task.priority === 'normal'
+                ? 'bg-lime-500/10 text-lime-500'
                 : 'bg-steel-700 text-ink-muted'
-            }`}>
+          }`}>
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                task.priority === 'high'
+                  ? 'bg-red-400'
+                  : task.priority === 'normal'
+                    ? 'bg-lime-500'
+                    : 'bg-steel-400'
+              }`}
+              aria-hidden="true"
+            />
               {task.priority}
-            </span>
-          )}
+          </span>
           {due && (
             <span className={`flex items-center gap-1 text-[11px] ${due.urgent && !task.completed ? 'text-red-400' : 'text-ink-muted'}`}>
               <Icon name="calendar" className="text-xs" />
