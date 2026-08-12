@@ -75,7 +75,7 @@ export function ContactModal({ open, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-steel-700 px-6 py-5">
           <div>
-            <h2 id="modal-title" className="text-lg font-semibold tracking-tight">Get in touch</h2>
+            <h2 id="modal-title" className="text-lg font-semibold tracking-tight">Send an email</h2>
             <p className="mt-0.5 text-sm text-ink-muted">We'll get back to you within two business days.</p>
           </div>
           <button
@@ -117,6 +117,7 @@ export function ContactModal({ open, onClose }: Props) {
                 type="text"
                 required
                 autoComplete="name"
+                maxLength={120}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
@@ -133,6 +134,7 @@ export function ContactModal({ open, onClose }: Props) {
                 type="email"
                 required
                 autoComplete="email"
+                maxLength={320}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -148,6 +150,7 @@ export function ContactModal({ open, onClose }: Props) {
                 id="cf-message"
                 required
                 rows={4}
+                maxLength={10000}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Tell me what you're trying to build or fix…"
@@ -173,7 +176,7 @@ export function ContactModal({ open, onClose }: Props) {
                 </>
               ) : (
                 <>
-                  Send message
+                  Send email
                   <Icon name="arrow" className="text-[1.05em]" />
                 </>
               )}

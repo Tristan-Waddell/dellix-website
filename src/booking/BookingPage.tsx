@@ -1,10 +1,13 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Cal, { getCalApi } from '@calcom/embed-react'
+import { ContactModal } from '../components/ContactModal.tsx'
 import { Icon } from '../components/Icon.tsx'
 import { Wordmark } from '../components/Wordmark.tsx'
 import { site } from '../data/site.ts'
 
 export function BookingPage() {
+  const [emailModalOpen, setEmailModalOpen] = useState(false)
+
   useEffect(() => {
     void (async () => {
       const cal = await getCalApi({})
@@ -63,11 +66,17 @@ export function BookingPage() {
 
         <p className="mt-6 text-center text-xs text-steel-400">
           Can&rsquo;t find a time?{' '}
-          <a href={`mailto:${site.email}`} className="text-ink-muted underline decoration-steel-600 underline-offset-4 hover:text-ink">
+          <button
+            type="button"
+            onClick={() => setEmailModalOpen(true)}
+            className="text-ink-muted underline decoration-steel-600 underline-offset-4 hover:text-ink"
+          >
             Send an email
-          </a>
+          </button>
         </p>
       </main>
+
+      <ContactModal open={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
     </div>
   )
 }
