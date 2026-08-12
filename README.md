@@ -32,9 +32,9 @@ Uncomment the example in `src/data/portfolio.ts` and fill it in. Each project su
 
 In `src/data/socials.ts`, set the `href` for GitHub / LinkedIn / X. An empty string keeps it as a disabled placeholder so the layout never breaks. To add a new platform, add an entry and a matching SVG in `src/components/Icon.tsx`.
 
-### Enable the "Book a call" button
+### Configure the unlisted booking page
 
-Set `bookingUrl` in `src/data/site.ts` (e.g. a Cal.com / Calendly link). Empty hides the button.
+Set `bookingUrl` in `src/data/site.ts` to the Cal.com event slug used by the standalone `/booking` page. The marketing site intentionally does not link to or load the scheduler; share the booking URL directly with invitees.
 
 ## Design system
 

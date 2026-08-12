@@ -11,7 +11,7 @@ export const site = {
   description:
     'Dellix builds custom AI agents and ships production software for teams that need real outcomes, not demos.',
   email: 'tristancwaddell@gmail.com',
-  /** Optional booking link (e.g. Cal.com / Calendly). Leave empty to hide the button. */
+  /** Cal.com event used only by the unlisted standalone /booking page. */
   bookingUrl: 'tristanwaddell/meeting',
 } as const
 
@@ -48,5 +48,5 @@ export const about = {
 
 export const contact = {
   heading: "Let's build something.",
-  body: 'Book a 30-minute intro call to talk through what you are building. Prefer async? Send a message instead.',
+  body: 'Tell me what you are building, what is getting in the way, and what a useful outcome looks like. I will get back to you within two business days.',
 } as const

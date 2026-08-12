@@ -3,5 +3,11 @@
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/booking", "destination": "/booking.html" }
+  ],
+  "headers": [
+    {
+      "source": "/booking",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
   ]
 }
